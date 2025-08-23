@@ -18,7 +18,6 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 import type { Station } from '@/types';
@@ -290,9 +289,22 @@ export function FilterPanel({
                         </Typography>
                       }
                     />
-                    <Grid container spacing={1} sx={{ pl: 2 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 1,
+                        pl: 2,
+                      }}
+                    >
                       {names.map(name => (
-                        <Grid xs={6} sm={4} md={3} key={name}>
+                        <Box
+                          key={name}
+                          sx={{
+                            minWidth: { xs: '45%', sm: '30%', md: '25%' },
+                            flexGrow: 1,
+                          }}
+                        >
                           <FormControlLabel
                             control={
                               <Checkbox
@@ -313,9 +325,9 @@ export function FilterPanel({
                             }
                             label={name}
                           />
-                        </Grid>
+                        </Box>
                       ))}
-                    </Grid>
+                    </Box>
                   </Box>
                 ))}
               </FormGroup>

@@ -2,49 +2,21 @@
 
 import dynamic from 'next/dynamic';
 import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  CircularProgress,
+  Card, CardContent, Typography, Box, CircularProgress,
 } from '@mui/material';
 import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
+  BarChart, Bar, PieChart, Pie, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Cell, ResponsiveContainer,
 } from 'recharts';
-import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Dynamically import the custom HeatmapLayer component, disabling SSR
-const HeatmapLayer = dynamic(
-  () => import('@/components/HeatmapLayer').then(mod => mod.HeatmapLayer),
+const ClientMapWithHeatmap = dynamic(
+  () => import('@/components/ClientMapWithHeatmap').then(mod => mod.ClientMapWithHeatmap),
   {
     ssr: false,
-    loading: () => (
-      <Box
-        sx={{
-          height: 300,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    ),
-  },
+    loading: () => <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box>
+  }
 );
 
-// Define the props structure for the component
 interface DashboardPageClientProps {
   averageCars: number;
   prefectureChartData: { name: string; count: number }[];
@@ -62,7 +34,7 @@ export function DashboardPageClient({
   top10CarData,
   heatmapData,
 }: DashboardPageClientProps) {
-  // Colors for the Pie Chart
+
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   return (
@@ -111,17 +83,8 @@ export function DashboardPageClient({
                 全国ステーションヒートマップ
               </Typography>
               <Box sx={{ height: 300 }}>
-                <MapContainer
-                  center={[35.6895, 139.6917]}
-                  zoom={5}
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <TileLayer
-                    url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <HeatmapLayer points={heatmapData} />
-                </MapContainer>
+                {/* 👇 新しいコンポーネントを使用 */}
+                <ClientMapWithHeatmap heatmapData={heatmapData} />
               </Box>
             </CardContent>
           </Card>

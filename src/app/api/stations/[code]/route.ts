@@ -10,14 +10,15 @@ const client = new MongoClient(uri);
 
 export async function GET(
   _: Request,
-  { params }: { params: { code: string } },
+  { params }: { params: Promise<{ code: string }> },
 ) {
   try {
+    const { code } = await params;
     await client.connect();
     const db = client.db('timescar');
     const station = await db
       .collection('stations')
-      .findOne({ station_code: params.code });
+      .findOne({ station_code: code });
 
     if (!station) {
       return NextResponse.json(
