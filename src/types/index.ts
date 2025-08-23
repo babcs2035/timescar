@@ -14,6 +14,7 @@ export interface Station {
   longitude: number;
   address: string;
   car_fleet: Car[];
+  photo_urls: string[];
   disp1MonthReserveLabel: string | null;
   disp3MonthReserveLabel: string | null;
 }

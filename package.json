@@ -10,6 +10,7 @@
     "format": "biome format ./src/**/* --write"
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.1",
@@ -18,7 +19,8 @@
     "next": "15.5.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "react-responsive-carousel": "^3.2.23"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
