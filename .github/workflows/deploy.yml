@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  MONGO_URI: ${{ secrets.MONGO_URI }}
+
 jobs:
   deploy:
     name: Deploy
