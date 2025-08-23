@@ -2,8 +2,15 @@
 
 import Link from 'next/link';
 import {
-  Box, Card, CardContent, Typography,
-  List, ListItem, ListItemText, Avatar, ListItemAvatar
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Avatar,
+  ListItemAvatar,
 } from '@mui/material';
 
 // Type for ranked station data
@@ -20,10 +27,16 @@ interface RankingPageClientProps {
 }
 
 // A reusable component to render a single ranking list
-const RankingList = ({ title, stations }: { title: string, stations: RankedStation[] }) => (
+const RankingList = ({
+  title,
+  stations,
+}: {
+  title: string;
+  stations: RankedStation[];
+}) => (
   <Card>
     <CardContent>
-      <Typography variant="h5" component="h2" gutterBottom>
+      <Typography variant='h5' component='h2' gutterBottom>
         {title}
       </Typography>
       <List>
@@ -34,7 +47,9 @@ const RankingList = ({ title, stations }: { title: string, stations: RankedStati
             href={`/station/${station.code}`}
           >
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: index < 3 ? 'secondary.main' : 'grey.500' }}>
+              <Avatar
+                sx={{ bgcolor: index < 3 ? 'secondary.main' : 'grey.500' }}
+              >
                 {index + 1}
               </Avatar>
             </ListItemAvatar>
@@ -49,7 +64,10 @@ const RankingList = ({ title, stations }: { title: string, stations: RankedStati
   </Card>
 );
 
-export function RankingPageClient({ topByCarCount, topByVariety }: RankingPageClientProps) {
+export function RankingPageClient({
+  topByCarCount,
+  topByVariety,
+}: RankingPageClientProps) {
   return (
     <Box
       sx={{
@@ -59,10 +77,16 @@ export function RankingPageClient({ topByCarCount, topByVariety }: RankingPageCl
       }}
     >
       <Box sx={{ flex: 1 }}>
-        <RankingList title="車両台数ランキング TOP10" stations={topByCarCount} />
+        <RankingList
+          title='車両台数ランキング TOP10'
+          stations={topByCarCount}
+        />
       </Box>
       <Box sx={{ flex: 1 }}>
-        <RankingList title="車種バリエーションランキング TOP10" stations={topByVariety} />
+        <RankingList
+          title='車種バリエーションランキング TOP10'
+          stations={topByVariety}
+        />
       </Box>
     </Box>
   );

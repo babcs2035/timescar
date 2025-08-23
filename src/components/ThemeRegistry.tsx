@@ -8,7 +8,11 @@ import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 
 // This implementation is directly from MUI's official documentation for the Next.js App Router.
-export default function ThemeRegistry({ children }: { children: React.ReactNode }) {
+export default function ThemeRegistry({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [{ cache, flush }] = useState(() => {
     const cache = createCache({ key: 'mui' });
     cache.compat = true;

@@ -4,18 +4,26 @@ import { NextResponse } from 'next/server';
 // Ensure MONGO_URI is in .env.local file
 const uri = process.env.MONGO_URI;
 if (!uri) {
-  throw new Error("MONGO_URI is not defined.");
+  throw new Error('MONGO_URI is not defined.');
 }
 const client = new MongoClient(uri);
 
-export async function GET(_: Request, { params }: { params: { code: string } }) {
+export async function GET(
+  _: Request,
+  { params }: { params: { code: string } },
+) {
   try {
     await client.connect();
     const db = client.db('timescar');
-    const station = await db.collection('stations').findOne({ station_code: params.code });
+    const station = await db
+      .collection('stations')
+      .findOne({ station_code: params.code });
 
     if (!station) {
-      return NextResponse.json({ message: 'Station not found' }, { status: 404 });
+      return NextResponse.json(
+        { message: 'Station not found' },
+        { status: 404 },
+      );
     }
 
     // Convert ObjectId to string for JSON serialization
@@ -27,7 +35,10 @@ export async function GET(_: Request, { params }: { params: { code: string } }) 
     return NextResponse.json(serializedStation);
   } catch (error) {
     console.error('Failed to fetch station:', error);
-    return NextResponse.json({ message: 'Failed to fetch station data' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Failed to fetch station data' },
+      { status: 500 },
+    );
   } finally {
     // await client.close();
   }

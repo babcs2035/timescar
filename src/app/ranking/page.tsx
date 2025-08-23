@@ -1,4 +1,7 @@
-import { RankingPageClient, type RankedStation } from '@/components/RankingPageClient';
+import {
+  RankingPageClient,
+  type RankedStation,
+} from '@/components/RankingPageClient';
 import type { Station } from '@/types';
 
 /**
@@ -6,7 +9,9 @@ import type { Station } from '@/types';
  * This function runs only on the server.
  */
 async function getStations(): Promise<Station[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stations`, { cache: 'no-store' });
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stations`, {
+    cache: 'no-store',
+  });
   if (!res.ok) {
     throw new Error('Failed to fetch station data');
   }
@@ -26,7 +31,7 @@ export default async function RankingPage() {
       code: station.station_code,
       name: station.station_name,
       value: station.car_fleet.length,
-      unit: '台'
+      unit: '台',
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
@@ -37,7 +42,7 @@ export default async function RankingPage() {
       code: station.station_code,
       name: station.station_name,
       value: new Set(station.car_fleet.map(car => car.car_name)).size,
-      unit: '車種'
+      unit: '車種',
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);

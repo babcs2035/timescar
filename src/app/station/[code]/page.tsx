@@ -8,7 +8,10 @@ import { StationDetailPage } from '@/components/StationDetailPage';
  * This function runs only on the server.
  */
 async function getStation(code: string): Promise<Station | null> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stations/${code}`, { cache: 'no-store' });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/stations/${code}`,
+    { cache: 'no-store' },
+  );
 
   if (res.status === 404) {
     return null;
@@ -24,7 +27,11 @@ async function getStation(code: string): Promise<Station | null> {
  * This is a Server Component for the dynamic route.
  * It fetches the data and renders the detail page.
  */
-export default async function StationPage({ params }: { params: { code: string } }) {
+export default async function StationPage({
+  params,
+}: {
+  params: { code: string };
+}) {
   const station = await getStation(params.code);
 
   if (!station) {
@@ -33,7 +40,7 @@ export default async function StationPage({ params }: { params: { code: string }
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth='md' sx={{ mt: 4, mb: 4 }}>
       <StationDetailPage station={station} />
     </Container>
   );

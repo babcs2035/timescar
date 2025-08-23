@@ -25,21 +25,46 @@ interface StationMapProps {
 export function StationMap({ stations }: StationMapProps) {
   return (
     <Box sx={{ flexGrow: 1, position: 'relative' }}>
-      <MapContainer center={[35.6895, 139.6917]} zoom={10} style={{ height: '100%', width: '100%' }}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+      <MapContainer
+        center={[35.6895, 139.6917]}
+        zoom={10}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
         {stations.map(station => (
-          <Marker key={station._id} position={[station.latitude, station.longitude]}>
+          <Marker
+            key={station._id}
+            position={[station.latitude, station.longitude]}
+          >
             <Popup>
-              <Typography variant="h6" component="div">{station.station_name}</Typography>
-              <Typography variant="body2" color="text.secondary">{station.address}</Typography>
+              <Typography variant='h6' component='div'>
+                {station.station_name}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {station.address}
+              </Typography>
               <Box mt={1}>
                 {/* 予約ラベル */}
-                <Chip label={`1-Month: ${station.disp1MonthReserveLabel || 'N/A'}`} size="small" sx={{ mr: 1, mb: 1 }} />
-                <Chip label={`3-Month: ${station.disp3MonthReserveLabel || 'N/A'}`} size="small" sx={{ mb: 1 }} />
+                <Chip
+                  label={`1-Month: ${station.disp1MonthReserveLabel || 'N/A'}`}
+                  size='small'
+                  sx={{ mr: 1, mb: 1 }}
+                />
+                <Chip
+                  label={`3-Month: ${station.disp3MonthReserveLabel || 'N/A'}`}
+                  size='small'
+                  sx={{ mb: 1 }}
+                />
               </Box>
               <Box mt={2}>
-                <Link href={`/station/${station.station_code}`} style={{ textDecoration: 'none' }}>
-                  <Button variant="contained" size="small">
+                <Link
+                  href={`/station/${station.station_code}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Button variant='contained' size='small'>
                     詳細を見る
                   </Button>
                 </Link>
