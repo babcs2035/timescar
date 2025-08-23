@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'timescar',
       script:
-        'export `cat .env` && PORT=2000 ~/.volta/bin/node standalone/server.js ',
+        'export `cat .env` && PORT=3200 ~/.volta/bin/node standalone/server.js ',
     },
   ],
 };

@@ -15,8 +15,11 @@ STATIONS_URL = f"{BASE_URL}/view/station/teeda.ajax?component=station_stationMap
 DETAIL_URL = f"{BASE_URL}/view/station/teeda.ajax?&component=station_detailPage&action=ajaxStation&scd={{}}"
 
 def fetch_and_process_data():
-    """Fetches, processes, and returns all Times Car station data."""
-    all_stations_data = []
+    """Fetches, processes, and saves each Times Car station data to MongoDB."""
+    
+    client = MongoClient(MONGO_URI)
+    db = client[MONGO_DB_NAME]
+    collection = db[MONGO_COLLECTION_NAME]
     
     try:
         print("Starting to fetch the station list...")
@@ -25,6 +28,8 @@ def fetch_and_process_data():
         station_codes = response.json().get("s", [])
         total_stations = len(station_codes)
         print(f"Found a total of {total_stations} stations.")
+        
+        upsert_count = 0
         
         for i, station in enumerate(station_codes):
             station_code = station.get("cd")
@@ -36,74 +41,62 @@ def fetch_and_process_data():
             # Wait for 1 second to reduce server load
             time.sleep(1) 
             
-            detail_response = requests.get(DETAIL_URL.format(station_code))
-            detail_response.raise_for_status()
-            station_detail = detail_response.json()
-            
-            photo_urls = []
-            for item in station_detail.get("photoImage", []):
-                html_string = item.get("photoChild", "")
-                relative_urls = re.findall(r"href='([^']*)'", html_string)
-                photo_urls.extend([BASE_URL + url for url in relative_urls])
+            try:
+                detail_response = requests.get(DETAIL_URL.format(station_code))
+                detail_response.raise_for_status()
+                station_detail = detail_response.json()
+                
+                photo_urls = []
+                for item in station_detail.get("photoImage", []):
+                    html_string = item.get("photoChild", "")
+                    relative_urls = re.findall(r"href='([^']*)'", html_string)
+                    photo_urls.extend([BASE_URL + url for url in relative_urls])
 
-            station_comment = station_detail.get("comment", "").replace("\r<br />", "\n")
+                station_comment = station_detail.get("comment", "").replace("\r<br />", "\n")
 
-            car_fleet = [
-                {
-                    "class_name": car.get("carClassName"),
-                    "car_name": car.get("carName"),
-                    "car_comments": re.sub(r"[\r\n]", "", car.get("carComments", ""))
-                } for car in station_detail.get("carInfo", [])
-            ]
+                car_fleet = [
+                    {
+                        "class_name": car.get("carClassName"),
+                        "car_name": car.get("carName"),
+                        "car_comments": re.sub(r"[\r\n]", "", car.get("carComments", ""))
+                    } for car in station_detail.get("carInfo", [])
+                ]
 
-            combined_data = {
-                "station_code": station_code,
-                "station_name": station.get("nm"),
-                "latitude": float(station.get("la", 0)),
-                "longitude": float(station.get("lo", 0)),
-                "address": station_detail.get("adr1"),
-                "station_comment": station_comment,
-                "car_fleet": car_fleet,
-                "photo_urls": photo_urls,
-                "disp1MonthReserveLabel": station.get("disp1MonthReserveLabel"),
-                "disp3MonthReserveLabel": station.get("disp3MonthReserveLabel"),
-            }
-            all_stations_data.append(combined_data)
+                combined_data = {
+                    "station_code": station_code,
+                    "station_name": station.get("nm"),
+                    "latitude": float(station.get("la", 0)),
+                    "longitude": float(station.get("lo", 0)),
+                    "address": station_detail.get("adr1"),
+                    "station_comment": station_comment,
+                    "car_fleet": car_fleet,
+                    "photo_urls": photo_urls,
+                    "disp1MonthReserveLabel": station.get("disp1MonthReserveLabel"),
+                    "disp3MonthReserveLabel": station.get("disp3MonthReserveLabel"),
+                }
+                
+                result = collection.update_one(
+                    {'station_code': station_code},
+                    {'$set': combined_data},
+                    upsert=True
+                )
+                
+                if result.upserted_id:
+                    upsert_count += 1
+                    print(f"  → New station inserted: {station_code}")
+                else:
+                    print(f"  → Station updated: {station_code}")
+                    
+            except requests.exceptions.RequestException as e:
+                print(f"  → Error fetching data for {station_code}: {e}")
+                continue
+
+        print(f"\nProcessing complete. Total stations processed: {total_stations}, newly inserted: {upsert_count}")
 
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred while fetching data: {e}")
-        return None
-
-    return all_stations_data
-
-def save_to_mongodb(data):
-    """Saves data to MongoDB (Upsert)."""
-    if not data:
-        print("No data to save.")
-        return
-        
-    client = MongoClient(MONGO_URI)
-    db = client[MONGO_DB_NAME]
-    collection = db[MONGO_COLLECTION_NAME]
-    
-    print(f"\nStarting to save to MongoDB (DB: {MONGO_DB_NAME}, Collection: {MONGO_COLLECTION_NAME})...")
-    
-    upsert_count = 0
-    for station_data in data:
-        # Based on station_code, update the data if it exists, otherwise insert it.
-        result = collection.update_one(
-            {'station_code': station_data['station_code']},
-            {'$set': station_data},
-            upsert=True
-        )
-        if result.upserted_id:
-            upsert_count += 1
-            
-    print(f"Save complete. Processed {len(data)} records, and {upsert_count} were newly inserted.")
-    client.close()
-
+        print(f"An error occurred while fetching station list: {e}")
+    finally:
+        client.close()
 
 if __name__ == "__main__":
-    processed_data = fetch_and_process_data()
-    if processed_data:
-        save_to_mongodb(processed_data)
+    fetch_and_process_data()
