@@ -4,11 +4,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "biome check ./src/**/*",
-    "format": "biome format ./src/**/* --write"
+    "build": "next build --turbopack && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
+    "lint": "pnpm biome lint ./src",
+    "format": "pnpm biome format --write ./src",
+    "check": "pnpm biome check --write ./src",
+    "type-check": "pnpm tsc --noEmit",
+    "prepare": "husky"
   },
+  "volta": {
+    "node": "22.16.0",
+    "pnpm": "10.12.4"
+  },
+  "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",

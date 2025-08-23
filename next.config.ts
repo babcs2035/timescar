@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   basePath: "/timescar",
+  output: "standalone",
   images: {
     remotePatterns: [
       {
