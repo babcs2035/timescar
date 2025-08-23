@@ -8,14 +8,13 @@
     "lint": "pnpm biome lint ./src",
     "format": "pnpm biome format --write ./src",
     "check": "pnpm biome check --write ./src",
-    "type-check": "pnpm tsc --noEmit",
-    "prepare": "husky"
+    "type-check": "pnpm tsc --noEmit"
   },
   "volta": {
     "node": "22.16.0",
-    "pnpm": "10.12.4"
+    "pnpm": "10.15.0"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.15.0",
   "dependencies": {
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
