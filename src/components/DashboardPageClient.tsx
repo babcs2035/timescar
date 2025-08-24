@@ -226,7 +226,7 @@ export function DashboardPageClient({
           <StatCard
             icon={<MapIcon />}
             title='総ステーション数'
-            value={heatmapData.length.toLocaleString()}
+            value={`${heatmapData.length.toLocaleString()}カ所`}
             subtitle='全国展開中'
             color='secondary'
           />
@@ -271,7 +271,7 @@ export function DashboardPageClient({
                         interval={0}
                         tick={{ fontSize: 12 }}
                       />
-                      <YAxis tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} unit='カ所' />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: theme.palette.background.paper,
@@ -283,7 +283,7 @@ export function DashboardPageClient({
                         dataKey='count'
                         fill={theme.palette.primary.main}
                         radius={[4, 4, 0, 0]}
-                        barSize={24}
+                        barSize={16}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -309,35 +309,33 @@ export function DashboardPageClient({
         >
           <Box sx={{ flex: '1 1 500px', minWidth: 0 }}>
             <ChartCard icon={<BarChartIcon />} title='車両台数分布ヒストグラム'>
-              <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                <Box sx={{ width: 600, height: 400 }}>
-                  <ResponsiveContainer width='100%' height='100%'>
-                    <BarChart
-                      data={histogramData}
-                      margin={{ bottom: 0, left: 10, right: 10, top: 0 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray='3 3'
-                        stroke={alpha('#000', 0.1)}
-                      />
-                      <XAxis dataKey='name' tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: theme.palette.background.paper,
-                          border: `1px solid ${theme.palette.divider}`,
-                          borderRadius: theme.shape.borderRadius,
-                        }}
-                      />
-                      <Bar
-                        dataKey='count'
-                        fill={theme.palette.secondary.main}
-                        radius={[4, 4, 0, 0]}
-                        barSize={24}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
+              <Box sx={{ width: '100%', height: 400, overflow: 'hidden' }}>
+                <ResponsiveContainer width='100%' height='100%'>
+                  <BarChart
+                    data={histogramData}
+                    margin={{ bottom: 0, left: 10, right: 10, top: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray='3 3'
+                      stroke={alpha('#000', 0.1)}
+                    />
+                    <XAxis dataKey='name' tick={{ fontSize: 12 }} unit='台' />
+                    <YAxis tick={{ fontSize: 12 }} unit='カ所' />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: theme.palette.background.paper,
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: theme.shape.borderRadius,
+                      }}
+                    />
+                    <Bar
+                      dataKey='count'
+                      fill={theme.palette.secondary.main}
+                      radius={[4, 4, 0, 0]}
+                      barSize={16}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </Box>
             </ChartCard>
           </Box>
@@ -392,39 +390,43 @@ export function DashboardPageClient({
           }}
         >
           <Box sx={{ flex: '1 1 100%', minWidth: 0 }}>
-            <ChartCard icon={<DirectionsCarIcon />} title='人気車種トップ10'>
-              <ResponsiveContainer width='100%' height={450}>
-                <BarChart
-                  layout='vertical'
-                  data={top10CarData}
-                  margin={{ top: 0, right: 10, left: 100, bottom: 0 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray='3 3'
-                    stroke={alpha('#000', 0.1)}
-                  />
-                  <XAxis type='number' tick={{ fontSize: 12 }} />
-                  <YAxis
-                    dataKey='name'
-                    type='category'
-                    width={90}
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: theme.palette.background.paper,
-                      border: `1px solid ${theme.palette.divider}`,
-                      borderRadius: theme.shape.borderRadius,
-                    }}
-                  />
-                  <Bar
-                    dataKey='count'
-                    fill={theme.palette.primary.main}
-                    radius={[0, 4, 4, 0]}
-                    barSize={24}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <ChartCard icon={<DirectionsCarIcon />} title='配備車種トップ10'>
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <Box sx={{ width: '99%', minWidth: 600, height: 450 }}>
+                  <ResponsiveContainer width='100%' height='100%'>
+                    <BarChart
+                      layout='vertical'
+                      data={top10CarData}
+                      margin={{ top: 0, right: 10, left: 100, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray='3 3'
+                        stroke={alpha('#000', 0.1)}
+                      />
+                      <XAxis type='number' tick={{ fontSize: 12 }} unit='台' />
+                      <YAxis
+                        dataKey='name'
+                        type='category'
+                        width={90}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: theme.palette.background.paper,
+                          border: `1px solid ${theme.palette.divider}`,
+                          borderRadius: theme.shape.borderRadius,
+                        }}
+                      />
+                      <Bar
+                        dataKey='count'
+                        fill={theme.palette.primary.main}
+                        radius={[0, 4, 4, 0]}
+                        barSize={16}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Box>
+              </Box>
             </ChartCard>
           </Box>
         </Box>
