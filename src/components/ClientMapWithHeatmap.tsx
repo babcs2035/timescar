@@ -10,7 +10,9 @@ interface ClientMapWithHeatmapProps {
 }
 
 // This component is a client-side wrapper for the entire map and heatmap
-export function ClientMapWithHeatmap({ heatmapData }: ClientMapWithHeatmapProps) {
+export function ClientMapWithHeatmap({
+  heatmapData,
+}: ClientMapWithHeatmapProps) {
   return (
     <MapContainer
       center={[35.6895, 139.6917]}

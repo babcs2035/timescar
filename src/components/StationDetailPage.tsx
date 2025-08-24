@@ -1,15 +1,28 @@
 'use client';
 
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import InfoIcon from '@mui/icons-material/Info';
+import LaunchIcon from '@mui/icons-material/Launch';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import {
+  alpha,
   Box,
-  Typography,
-  Paper,
-  Link,
+  Button,
+  Card,
+  CardContent,
   Chip,
+  Container,
+  Divider,
   List,
   ListItem,
+  ListItemIcon,
   ListItemText,
+  Paper,
   Stack,
+  Typography,
+  useTheme,
 } from '@mui/material';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -19,124 +32,324 @@ const Carousel = dynamic(
   () => import('react-responsive-carousel').then(mod => mod.Carousel),
   { ssr: false },
 );
-import 'react-responsive-carousel/lib/styles/carousel.min.css'; // Carousel styles
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import type { CarouselProps } from 'react-responsive-carousel';
 
-interface StationDetailPageProps {
-  station: Station;
-}
+const InfoCard = ({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) => {
+  const theme = useTheme();
 
-export function StationDetailPage({ station }: StationDetailPageProps) {
   return (
-    <Paper sx={{ p: 4, my: 4 }}>
-      <Stack spacing={4}>
-        {/* Station Header */}
-        <Box>
-          <Typography variant='h4' component='h1' gutterBottom>
-            {station.station_name}
-          </Typography>
-          <Typography variant='body1' color='text.secondary'>
-            {station.address}
-          </Typography>
-          <Link
-            href={`https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`}
-            target='_blank'
-            rel='noopener'
-            sx={{ mt: 1, display: 'inline-block' }}
+    <Card sx={{ height: '100%' }}>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: 2,
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              color: 'primary.main',
+              mr: 2,
+            }}
           >
-            Google Maps で開く
-          </Link>
+            {icon}
+          </Box>
+          <Typography variant='h6' sx={{ fontWeight: 600 }}>
+            {title}
+          </Typography>
         </Box>
+        {children}
+      </CardContent>
+    </Card>
+  );
+};
 
-        {/* Photo Gallery */}
-        {station.photo_urls && station.photo_urls.length > 0 && (
-          <Box>
-            <Box sx={{ maxWidth: '100%', mx: 'auto' }}>
-              <Carousel
-                {...({
-                  showThumbs: false,
-                  infiniteLoop: true,
-                  useKeyboardArrows: true,
-                  autoPlay: true,
-                } as CarouselProps)}
-              >
-                {station.photo_urls.map((url, index) => (
-                  <Box key={url}>
-                    <Image
-                      src={url}
-                      alt={`Station view ${index + 1}`}
-                      width={800}
-                      height={600}
-                      style={{
-                        width: '100%',
-                        height: 'auto',
-                        objectFit: 'cover',
-                      }}
-                    />
-                  </Box>
-                ))}
-              </Carousel>
+const getClassColor = (className: string) => {
+  switch (className) {
+    case 'ベーシック':
+      return 'success';
+    case 'ミドル':
+      return 'primary';
+    case 'プレミアム':
+      return 'secondary';
+    default:
+      return 'default';
+  }
+};
+
+export function StationDetailPage({ station }: { station: Station }) {
+  const theme = useTheme();
+
+  return (
+    <Container maxWidth='lg' sx={{ py: { xs: 2, sm: 4 } }}>
+      <Paper
+        sx={{
+          p: { xs: 3, sm: 4 },
+          mb: 4,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+        }}
+      >
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={3}
+          alignItems='flex-start'
+        >
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant='h4'
+              component='h1'
+              gutterBottom
+              sx={{
+                fontWeight: 700,
+                color: 'primary.main',
+                wordBreak: 'break-word',
+              }}
+            >
+              {station.station_name}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <LocationOnIcon sx={{ color: 'text.secondary', mr: 1 }} />
+              <Typography variant='body1' color='text.secondary'>
+                {station.address}
+              </Typography>
             </Box>
+            <Button
+              variant='outlined'
+              startIcon={<LaunchIcon />}
+              href={`https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`}
+              target='_blank'
+              rel='noopener'
+              sx={{ borderRadius: 2 }}
+            >
+              Google Maps で開く
+            </Button>
+          </Box>
+
+          <Stack spacing={1} sx={{ minWidth: 200 }}>
+            <Chip
+              icon={<EventAvailableIcon />}
+              label={`1ヶ月先: ${station.disp1MonthReserveLabel || 'N/A'}`}
+              variant='outlined'
+              size='medium'
+            />
+            <Chip
+              icon={<EventAvailableIcon />}
+              label={`3ヶ月先: ${station.disp3MonthReserveLabel || 'N/A'}`}
+              variant='outlined'
+              size='medium'
+            />
+          </Stack>
+        </Stack>
+      </Paper>
+
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', lg: 'row' },
+          gap: 4,
+        }}
+      >
+        {station.photo_urls && station.photo_urls.length > 0 && (
+          <Box sx={{ flex: 1 }}>
+            <InfoCard icon={<PhotoLibraryIcon />} title='ステーション写真'>
+              <Box
+                sx={{
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  border: `1px solid ${theme.palette.divider}`,
+                  '& .carousel-root': {
+                    borderRadius: 2,
+                  },
+                }}
+              >
+                <Carousel
+                  {...({
+                    showThumbs: false,
+                    infiniteLoop: true,
+                    useKeyboardArrows: true,
+                    autoPlay: true,
+                    interval: 5000,
+                    showStatus: false,
+                    emulateTouch: true,
+                  } as CarouselProps)}
+                >
+                  {station.photo_urls.map((url, index) => (
+                    <Box key={url} sx={{ position: 'relative', height: 300 }}>
+                      <Image
+                        src={url}
+                        alt={`ステーション画像 ${index + 1}`}
+                        fill
+                        style={{
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                        }}
+                        sizes='(max-width: 768px) 100vw, 50vw'
+                      />
+                    </Box>
+                  ))}
+                </Carousel>
+              </Box>
+            </InfoCard>
           </Box>
         )}
 
-        {/* Car Fleet List */}
-        <Box>
-          <Typography variant='h5' component='h2' gutterBottom>
-            車両リスト
-          </Typography>
-          <List sx={{ border: '1px solid #eee', borderRadius: 2 }}>
-            {station.car_fleet.map((car, index) => (
-              <ListItem
-                key={car.car_name}
+        <Box sx={{ flex: 1 }}>
+          <InfoCard
+            icon={<DirectionsCarIcon />}
+            title={`車両リスト (${station.car_fleet.length}台)`}
+          >
+            <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <List
                 sx={{
-                  borderBottom:
-                    index < station.car_fleet.length - 1
-                      ? '1px solid #eee'
-                      : 'none',
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRadius: 2,
+                  bgcolor: 'background.paper',
                 }}
               >
-                <ListItemText
-                  primary={
-                    <Typography variant='subtitle1'>
-                      {car.car_name}{' '}
-                      <Chip
-                        label={car.class_name}
-                        size='small'
-                        sx={{ ml: 1 }}
-                      />
-                    </Typography>
-                  }
-                  secondary={
-                    <Typography variant='body2' color='text.secondary'>
-                      {car.car_comments || 'No comments'}
-                    </Typography>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
+                {station.car_fleet.map((car, index) => (
+                  <ListItem
+                    key={`${car.car_name}-${index}`}
+                    sx={{
+                      borderBottom:
+                        index < station.car_fleet.length - 1
+                          ? `1px solid ${theme.palette.divider}`
+                          : 'none',
+                      '&:hover': {
+                        backgroundColor: alpha(
+                          theme.palette.primary.main,
+                          0.05,
+                        ),
+                      },
+                    }}
+                  >
+                    <ListItemIcon>
+                      <DirectionsCarIcon color='primary' />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            flexWrap: 'wrap',
+                          }}
+                        >
+                          <Typography
+                            variant='subtitle1'
+                            sx={{ fontWeight: 500 }}
+                          >
+                            {car.car_name}
+                          </Typography>
+                          <Chip
+                            label={car.class_name}
+                            size='small'
+                            color={getClassColor(car.class_name)}
+                            variant='outlined'
+                          />
+                        </Box>
+                      }
+                      secondary={
+                        car.car_comments && (
+                          <Typography
+                            variant='body2'
+                            color='text.secondary'
+                            sx={{ mt: 0.5 }}
+                          >
+                            <InfoIcon
+                              sx={{
+                                fontSize: 14,
+                                mr: 0.5,
+                                verticalAlign: 'text-bottom',
+                              }}
+                            />
+                            {car.car_comments}
+                          </Typography>
+                        )
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          </InfoCard>
         </Box>
+      </Box>
 
-        {/* Reservation Labels */}
-        <Box>
-          <Typography variant='h5' component='h2' gutterBottom>
-            予約ラベル
+      <Card sx={{ mt: 4 }}>
+        <CardContent>
+          <Typography variant='h6' gutterBottom sx={{ fontWeight: 600 }}>
+            ステーション情報サマリー
           </Typography>
-          <Stack direction='row' spacing={1}>
-            <Chip
-              label={`1ヶ月先: ${station.disp1MonthReserveLabel || 'N/A'}`}
-              color='primary'
-              variant='outlined'
-            />
-            <Chip
-              label={`3ヶ月先: ${station.disp3MonthReserveLabel || 'N/A'}`}
-              color='secondary'
-              variant='outlined'
-            />
-          </Stack>
-        </Box>
-      </Stack>
-    </Paper>
+          <Divider sx={{ mb: 2 }} />
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 2,
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Box sx={{ textAlign: 'center', p: 2, flex: '1 1 200px' }}>
+              <Typography
+                variant='h4'
+                color='primary.main'
+                sx={{ fontWeight: 700 }}
+              >
+                {station.car_fleet.length}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                総車両台数
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', p: 2, flex: '1 1 200px' }}>
+              <Typography
+                variant='h4'
+                color='secondary.main'
+                sx={{ fontWeight: 700 }}
+              >
+                {new Set(station.car_fleet.map(car => car.car_name)).size}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                車種バリエーション
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', p: 2, flex: '1 1 200px' }}>
+              <Typography
+                variant='h4'
+                color='success.main'
+                sx={{ fontWeight: 700 }}
+              >
+                {new Set(station.car_fleet.map(car => car.class_name)).size}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                クラス数
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', p: 2, flex: '1 1 200px' }}>
+              <Typography
+                variant='h4'
+                color='warning.main'
+                sx={{ fontWeight: 700 }}
+              >
+                {station.station_code}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                ステーションコード
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }

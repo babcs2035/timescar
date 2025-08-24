@@ -1,6 +1,6 @@
 import {
-  RankingPageClient,
   type RankedStation,
+  RankingPageClient,
 } from '@/components/RankingPageClient';
 import type { Station } from '@/types';
 

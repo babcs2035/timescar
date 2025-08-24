@@ -1,16 +1,15 @@
 'use client';
 
-import { Box, Typography, Chip, Button } from '@mui/material';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Box, Button, Chip, Typography } from '@mui/material';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import type { Station } from '@/types';
-import Link from 'next/link';
-
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
 // Fix for default marker icon path issue
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import Link from 'next/link';
+import type { Station } from '@/types';
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,

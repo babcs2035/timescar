@@ -1,25 +1,34 @@
 'use client';
 
+import ClearIcon from '@mui/icons-material/Clear';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import {
-  Stack,
-  Typography,
-  Paper,
   Box,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
   Checkbox,
+  Chip,
+  Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
   FormControlLabel,
   FormGroup,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Typography,
+  useTheme,
 } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Station } from '@/types';
 
 interface FilterPanelProps {
@@ -43,30 +52,33 @@ export function FilterPanel({
   setSelectedCarNames,
   filteredCount,
 }: FilterPanelProps) {
+  const theme = useTheme();
+  const [isClient, setIsClient] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [openCityDialog, setOpenCityDialog] = useState(false);
   const [openCarDialog, setOpenCarDialog] = useState(false);
 
-  // Temporary states for dialogs
   const [tempSelectedPrefecture, setTempSelectedPrefecture] =
     useState(selectedPrefecture);
   const [tempSelectedCity, setTempSelectedCity] = useState(selectedCity);
   const [tempSelectedCarNames, setTempSelectedCarNames] =
     useState(selectedCarNames);
 
-  // Memoize unique filter options and grouped car names
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const { prefectures, cities, groupedCarNames } = useMemo(() => {
     const prefectureSet = new Set<string>();
     const citySet = new Set<string>();
     const carData = new Map<string, string[]>();
 
     stations.forEach(s => {
-      // Extract prefecture from address
       const prefectureMatch = s.address.match(/^(.{2,3}?[都道府県])/);
       if (prefectureMatch) {
         prefectureSet.add(prefectureMatch[0]);
       }
 
-      // Extract city from address
       if (s.address.startsWith(tempSelectedPrefecture)) {
         const cityMatch = s.address.match(/市|区|郡|町|村/);
         if (cityMatch && cityMatch.index !== undefined) {
@@ -79,7 +91,6 @@ export function FilterPanel({
         }
       }
 
-      // Group car names by class
       s.car_fleet.forEach(c => {
         if (!carData.has(c.class_name)) {
           carData.set(c.class_name, []);
@@ -90,7 +101,6 @@ export function FilterPanel({
       });
     });
 
-    // Sort and structure grouped car names
     const sortedCarNames: { [key: string]: string[] } = {};
     const order = ['ベーシック', 'ミドル', 'プレミアム'];
     order.forEach(cl => {
@@ -106,7 +116,6 @@ export function FilterPanel({
     };
   }, [stations, tempSelectedPrefecture]);
 
-  // Handle dialog open/close
   const handleCityDialogOpen = () => {
     setTempSelectedPrefecture(selectedPrefecture);
     setTempSelectedCity(selectedCity);
@@ -129,7 +138,6 @@ export function FilterPanel({
     setOpenCarDialog(false);
   };
 
-  // Handle "select all" for a group
   const handleSelectAllGroup = (group: string, isChecked: boolean) => {
     const groupNames = groupedCarNames[group] || [];
     if (isChecked) {
@@ -141,7 +149,6 @@ export function FilterPanel({
     }
   };
 
-  // Check if a group is fully selected
   const isGroupFullySelected = (group: string) => {
     const groupNames = groupedCarNames[group] || [];
     return (
@@ -150,11 +157,9 @@ export function FilterPanel({
     );
   };
 
-  // Check if a single car is selected
   const isCarSelected = (carName: string) =>
     tempSelectedCarNames.includes(carName);
 
-  // Handlers for deleting chips
   const handlePrefectureDelete = () => {
     setSelectedPrefecture('all');
     setSelectedCity('all');
@@ -174,213 +179,266 @@ export function FilterPanel({
   const areFiltersActive =
     selectedPrefecture !== 'all' || selectedCarNames.length > 0;
 
+  if (!isClient) {
+    return null;
+  }
+
   return (
     <Paper
+      elevation={3}
       sx={{
-        p: 2,
+        borderRadius: 2,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(10px)',
+        position: 'absolute',
+        top: 16,
+        right: 16,
         zIndex: 1000,
-        position: 'relative',
-        borderRadius: 0,
-        boxShadow: 3,
+        width: {
+          xs: 'calc(100% - 32px)',
+          sm: 400,
+        },
+        transition: theme.transitions.create(['padding', 'width'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.shorter,
+        }),
       }}
     >
-      <Typography variant='h4' gutterBottom>
-        Times Car Station Map
-      </Typography>
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={2}
-        sx={{ mb: 2, flexWrap: 'wrap' }}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          p: 2,
+        }}
+        onClick={() => setIsExpanded(!isExpanded)}
       >
-        {/* City/Prefecture Filter Button */}
-        <Box sx={{ minWidth: { xs: '100%', sm: 150 } }}>
-          <Button variant='outlined' onClick={handleCityDialogOpen} fullWidth>
-            エリアを選択
-          </Button>
-          <Dialog open={openCityDialog} onClose={handleCityDialogClose}>
-            <DialogTitle>エリアを選択</DialogTitle>
-            <DialogContent>
-              <Stack
-                direction='column'
-                spacing={2}
-                sx={{ py: 2, minWidth: 300 }}
-              >
-                <FormControl fullWidth>
-                  <InputLabel>都道府県</InputLabel>
-                  <Select
-                    value={tempSelectedPrefecture}
-                    label='都道府県'
-                    onChange={e => setTempSelectedPrefecture(e.target.value)}
-                  >
-                    {prefectures.map(pref => (
-                      <MenuItem key={pref} value={pref}>
-                        {pref === 'all' ? 'すべての都道府県' : pref}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl
-                  fullWidth
-                  disabled={tempSelectedPrefecture === 'all'}
-                >
-                  <InputLabel>市区町村</InputLabel>
-                  <Select
-                    value={tempSelectedCity}
-                    label='市区町村'
-                    onChange={e => setTempSelectedCity(e.target.value)}
-                  >
-                    {cities.map(city => (
-                      <MenuItem key={city} value={city}>
-                        {city === 'all' ? 'すべての市区町村' : city}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Stack>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCityDialogClose}>キャンセル</Button>
-              <Button onClick={handleCityDialogOk} variant='contained'>
-                OK
-              </Button>
-            </DialogActions>
-          </Dialog>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <FilterListIcon sx={{ color: 'primary.main' }} />
+          <Typography variant='h6' sx={{ fontWeight: 600 }}>
+            ステーション検索
+          </Typography>
         </Box>
+        <IconButton size='small'>
+          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </IconButton>
+      </Box>
 
-        {/* Car Selection Filter Button */}
-        <Box sx={{ minWidth: { xs: '100%', sm: 150 } }}>
-          <Button variant='outlined' onClick={handleCarDialogOpen} fullWidth>
-            車種を選択
-          </Button>
-          <Dialog
-            open={openCarDialog}
-            onClose={handleCarDialogClose}
-            fullWidth
-            maxWidth='sm'
-          >
-            <DialogTitle>車種を選択</DialogTitle>
-            <DialogContent>
-              <FormGroup>
-                {Object.entries(groupedCarNames).map(([group, names]) => (
-                  <Box
-                    key={group}
-                    sx={{
-                      mb: 2,
-                      border: '1px solid #eee',
-                      p: 2,
-                      borderRadius: 2,
-                    }}
-                  >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={isGroupFullySelected(group)}
-                          onChange={e =>
-                            handleSelectAllGroup(group, e.target.checked)
-                          }
-                        />
-                      }
-                      label={
-                        <Typography
-                          variant='subtitle1'
-                          sx={{ fontWeight: 'bold' }}
-                        >
-                          {group} (すべて選択)
-                        </Typography>
-                      }
-                    />
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 1,
-                        pl: 2,
-                      }}
-                    >
-                      {names.map(name => (
-                        <Box
-                          key={name}
-                          sx={{
-                            minWidth: { xs: '45%', sm: '30%', md: '25%' },
-                            flexGrow: 1,
-                          }}
-                        >
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={isCarSelected(name)}
-                                onChange={e => {
-                                  if (e.target.checked) {
-                                    setTempSelectedCarNames(prev => [
-                                      ...prev,
-                                      name,
-                                    ]);
-                                  } else {
-                                    setTempSelectedCarNames(prev =>
-                                      prev.filter(n => n !== name),
-                                    );
-                                  }
-                                }}
-                              />
-                            }
-                            label={name}
-                          />
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                ))}
-              </FormGroup>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCarDialogClose}>キャンセル</Button>
-              <Button onClick={handleCarDialogOk} variant='contained'>
-                OK
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Box>
-      </Stack>
-
-      {areFiltersActive && (
-        <Box sx={{ my: 2 }}>
+      <Collapse in={isExpanded} timeout='auto' unmountOnExit>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 3 } }}>
           <Stack
-            direction='row'
-            spacing={1}
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
             alignItems='center'
-            flexWrap='wrap'
           >
-            <Typography variant='body2' sx={{ mr: 1, fontWeight: 'bold' }}>
-              選択中の条件:
-            </Typography>
-            {selectedPrefecture !== 'all' && (
-              <Chip
-                label={selectedPrefecture}
-                onDelete={handlePrefectureDelete}
-              />
-            )}
-            {selectedCity !== 'all' && (
-              <Chip label={selectedCity} onDelete={handleCityDelete} />
-            )}
-            {selectedCarNames.map(name => (
-              <Chip
-                key={name}
-                label={name}
-                onDelete={() => handleCarNameDelete(name)}
-              />
-            ))}
             <Button
-              onClick={handleClearAll}
-              size='small'
-              variant='text'
-              color='error'
+              variant='outlined'
+              onClick={handleCityDialogOpen}
+              startIcon={<LocationOnIcon />}
+              fullWidth
             >
-              すべてクリア
+              エリア選択
+            </Button>
+            <Button
+              variant='outlined'
+              onClick={handleCarDialogOpen}
+              startIcon={<DirectionsCarIcon />}
+              fullWidth
+            >
+              車種選択
             </Button>
           </Stack>
+
+          {areFiltersActive && (
+            <Stack spacing={1.5} sx={{ mt: 2.5 }}>
+              <Typography
+                variant='body2'
+                sx={{ fontWeight: 500, color: 'text.secondary' }}
+              >
+                適用中のフィルター:
+              </Typography>
+              <Stack direction='row' spacing={1} flexWrap='wrap' useFlexGap>
+                {selectedPrefecture !== 'all' && (
+                  <Chip
+                    label={selectedPrefecture}
+                    onDelete={handlePrefectureDelete}
+                    color='primary'
+                    size='small'
+                  />
+                )}
+                {selectedCity !== 'all' && (
+                  <Chip
+                    label={selectedCity}
+                    onDelete={handleCityDelete}
+                    color='primary'
+                    size='small'
+                  />
+                )}
+                {selectedCarNames.map(name => (
+                  <Chip
+                    key={name}
+                    label={name}
+                    onDelete={() => handleCarNameDelete(name)}
+                    color='secondary'
+                    size='small'
+                  />
+                ))}
+                <Button
+                  onClick={handleClearAll}
+                  startIcon={<ClearIcon />}
+                  color='error'
+                  size='small'
+                  sx={{ ml: 'auto', textTransform: 'none' }}
+                >
+                  すべてクリア
+                </Button>
+              </Stack>
+            </Stack>
+          )}
+
+          <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+            <Typography
+              variant='body1'
+              sx={{
+                fontWeight: 600,
+                color: 'primary.main',
+                textAlign: 'center',
+              }}
+            >
+              検索結果: {filteredCount.toLocaleString()} /{' '}
+              {stations.length.toLocaleString()} 件
+            </Typography>
+          </Box>
         </Box>
-      )}
-      <Typography variant='body1'>{`Showing ${filteredCount} of ${stations.length} stations.`}</Typography>
+      </Collapse>
+
+      <Dialog
+        open={openCityDialog}
+        onClose={handleCityDialogClose}
+        maxWidth='sm'
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>エリアを選択</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            <FormControl fullWidth>
+              <InputLabel>都道府県</InputLabel>
+              <Select
+                value={tempSelectedPrefecture}
+                label='都道府県'
+                onChange={e => {
+                  setTempSelectedPrefecture(e.target.value);
+                  setTempSelectedCity('all');
+                }}
+              >
+                {prefectures.map(pref => (
+                  <MenuItem key={pref} value={pref}>
+                    {pref === 'all' ? 'すべての都道府県' : pref}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth disabled={tempSelectedPrefecture === 'all'}>
+              <InputLabel>市区町村</InputLabel>
+              <Select
+                value={tempSelectedCity}
+                label='市区町村'
+                onChange={e => setTempSelectedCity(e.target.value)}
+              >
+                {cities.map(city => (
+                  <MenuItem key={city} value={city}>
+                    {city === 'all' ? 'すべての市区町村' : city}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCityDialogClose}>キャンセル</Button>
+          <Button onClick={handleCityDialogOk} variant='contained'>
+            適用
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openCarDialog}
+        onClose={handleCarDialogClose}
+        fullWidth
+        maxWidth='md'
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>車種を選択</DialogTitle>
+        <DialogContent>
+          <FormGroup>
+            {Object.entries(groupedCarNames).map(([group, names]) => (
+              <Paper
+                key={group}
+                variant='outlined'
+                sx={{ mb: 2, p: 2, borderRadius: 2 }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isGroupFullySelected(group)}
+                      onChange={e =>
+                        handleSelectAllGroup(group, e.target.checked)
+                      }
+                      color='primary'
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant='subtitle1'
+                      sx={{ fontWeight: 600, color: 'primary.main' }}
+                    >
+                      {group} (すべて選択)
+                    </Typography>
+                  }
+                />
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    pl: 4,
+                    mt: 1,
+                  }}
+                >
+                  {names.map(name => (
+                    <FormControlLabel
+                      key={name}
+                      control={
+                        <Checkbox
+                          checked={isCarSelected(name)}
+                          onChange={e => {
+                            if (e.target.checked) {
+                              setTempSelectedCarNames(prev => [...prev, name]);
+                            } else {
+                              setTempSelectedCarNames(prev =>
+                                prev.filter(n => n !== name),
+                              );
+                            }
+                          }}
+                          size='small'
+                        />
+                      }
+                      label={<Typography variant='body2'>{name}</Typography>}
+                    />
+                  ))}
+                </Box>
+              </Paper>
+            ))}
+          </FormGroup>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCarDialogClose}>キャンセル</Button>
+          <Button onClick={handleCarDialogOk} variant='contained'>
+            適用
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

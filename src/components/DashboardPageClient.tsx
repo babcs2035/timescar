@@ -1,20 +1,57 @@
 'use client';
-
+import BarChartIcon from '@mui/icons-material/BarChart';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import MapIcon from '@mui/icons-material/Map';
+import PieChartIcon from '@mui/icons-material/PieChart';
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
+import {
+  alpha,
+  Box,
+  Card,
+  CardContent,
+  CircularProgress,
+  Container,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import dynamic from 'next/dynamic';
 import {
-  Card, CardContent, Typography, Box, CircularProgress,
-} from '@mui/material';
-import {
-  BarChart, Bar, PieChart, Pie, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Cell, ResponsiveContainer,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
 import 'leaflet/dist/leaflet.css';
 
 const ClientMapWithHeatmap = dynamic(
-  () => import('@/components/ClientMapWithHeatmap').then(mod => mod.ClientMapWithHeatmap),
+  () =>
+    import('@/components/ClientMapWithHeatmap').then(
+      mod => mod.ClientMapWithHeatmap,
+    ),
   {
     ssr: false,
-    loading: () => <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box>
-  }
+    loading: () => (
+      <Box
+        sx={{
+          height: 300,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: alpha('#1976d2', 0.05),
+          borderRadius: 2,
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    ),
+  },
 );
 
 interface DashboardPageClientProps {
@@ -24,7 +61,100 @@ interface DashboardPageClientProps {
   classPieData: { name: string; value: number }[];
   top10CarData: { name: string; count: number }[];
   heatmapData: [number, number, number][];
+  totalCarModels: number;
 }
+
+const StatCard = ({
+  icon,
+  title,
+  value,
+  subtitle,
+  color = 'primary' as 'primary' | 'secondary' | 'success' | 'warning',
+}: {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  subtitle?: string;
+  color?: 'primary' | 'secondary' | 'success' | 'warning';
+}) => {
+  const theme = useTheme();
+
+  return (
+    <Card
+      sx={{
+        height: '100%',
+        background: `linear-gradient(135deg, ${alpha(theme.palette[color].main, 0.1)} 0%, ${alpha(theme.palette[color].light, 0.05)} 100%)`,
+        border: `1px solid ${alpha(theme.palette[color].main, 0.2)}`,
+      }}
+    >
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: 2,
+              backgroundColor: alpha(theme.palette[color].main, 0.1),
+              color: theme.palette[color].main,
+              mr: 2,
+            }}
+          >
+            {icon}
+          </Box>
+          <Typography
+            variant='h6'
+            color='text.secondary'
+            sx={{ fontWeight: 500 }}
+          >
+            {title}
+          </Typography>
+        </Box>
+        <Typography
+          variant='h4'
+          sx={{ fontWeight: 700, color: theme.palette[color].main, mb: 1 }}
+        >
+          {value}
+        </Typography>
+        {subtitle && (
+          <Typography variant='body2' color='text.secondary'>
+            {subtitle}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const ChartCard = ({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <Card sx={{ height: '100%' }}>
+    <CardContent>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <Box
+          sx={{
+            p: 1,
+            borderRadius: 2,
+            backgroundColor: alpha('#1976d2', 0.1),
+            color: 'primary.main',
+            mr: 2,
+          }}
+        >
+          {icon}
+        </Box>
+        <Typography variant='h6' sx={{ fontWeight: 600 }}>
+          {title}
+        </Typography>
+      </Box>
+      {children}
+    </CardContent>
+  </Card>
+);
 
 export function DashboardPageClient({
   averageCars,
@@ -33,114 +163,201 @@ export function DashboardPageClient({
   classPieData,
   top10CarData,
   heatmapData,
+  totalCarModels,
 }: DashboardPageClientProps) {
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+  const theme = useTheme();
+  const COLORS = [
+    theme.palette.primary.main,
+    theme.palette.secondary.main,
+    '#00C49F',
+    '#FFBB28',
+    '#FF8042',
+    '#8884d8',
+    '#82ca9d',
+    '#ffc658',
+    '#ff7c7c',
+    '#8dd1e1',
+  ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {/* First Row - Prefecture Distribution and National Heatmap */}
+    <Container maxWidth='xl' sx={{ py: { xs: 2, sm: 4 } }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant='h4'
+          component='h1'
+          gutterBottom
+          sx={{
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
+          <SpaceDashboardIcon sx={{ fontSize: '2.5rem', color: 'grey' }} />
+          Dashboard
+        </Typography>
+        <Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
+          全国のタイムズカーステーション統計情報
+        </Typography>
+      </Box>
+
       <Box
         sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          gap: 4,
+          flexWrap: 'wrap',
+          gap: 3,
+          mb: 4,
         }}
       >
-        <Box sx={{ flex: 1 }}>
-          <Card>
-            <CardContent>
-              <Typography variant='h5' component='h2' gutterBottom>
-                都道府県別ステーション数
-              </Typography>
-              <ResponsiveContainer width='100%' height={300}>
-                <BarChart
-                  data={prefectureChartData}
-                  margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis
-                    dataKey='name'
-                    angle={-45}
-                    textAnchor='end'
-                    height={80}
-                    interval={0}
-                  />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey='count' fill='#8884d8' name='ステーション数' />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+        <Box sx={{ flex: '1 1 300px' }}>
+          <StatCard
+            icon={<DirectionsCarIcon />}
+            title='平均車両台数'
+            value={`${averageCars.toFixed(1)}台`}
+            subtitle='1ステーションあたり'
+            color='primary'
+          />
         </Box>
-
-        <Box sx={{ flex: 1 }}>
-          <Card>
-            <CardContent>
-              <Typography variant='h5' component='h2' gutterBottom>
-                全国ステーションヒートマップ
-              </Typography>
-              <Box sx={{ height: 300 }}>
-                {/* 👇 新しいコンポーネントを使用 */}
-                <ClientMapWithHeatmap heatmapData={heatmapData} />
-              </Box>
-            </CardContent>
-          </Card>
+        <Box sx={{ flex: '1 1 300px' }}>
+          <StatCard
+            icon={<MapIcon />}
+            title='総ステーション数'
+            value={heatmapData.length.toLocaleString()}
+            subtitle='全国展開中'
+            color='secondary'
+          />
+        </Box>
+        <Box sx={{ flex: '1 1 300px' }}>
+          <StatCard
+            icon={<PieChartIcon />}
+            title='車種数'
+            value={`${totalCarModels}種類`}
+            subtitle='多様なニーズに対応'
+            color='success'
+          />
         </Box>
       </Box>
 
-      {/* Second Row - Car Count Histogram and Vehicle Class Ratio */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          gap: 4,
-        }}
-      >
-        <Box sx={{ flex: 1 }}>
-          <Card>
-            <CardContent>
-              <Typography variant='h5' component='h2' gutterBottom>
-                車両台数ヒストグラム
-              </Typography>
-              <Typography variant='h6' color='text.secondary' sx={{ mb: 2 }}>
-                平均車両台数: {averageCars.toFixed(2)}台
-              </Typography>
-              <ResponsiveContainer width='100%' height={300}>
-                <BarChart
-                  data={histogramData}
-                  margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray='3 3' />
-                  <XAxis dataKey='name' />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey='count' fill='#82ca9d' name='ステーション数' />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', lg: 'row' },
+            gap: 3,
+          }}
+        >
+          <Box sx={{ flex: '1 1 500px', minWidth: 0 }}>
+            <ChartCard icon={<BarChartIcon />} title='都道府県別ステーション数'>
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <Box sx={{ width: 1200, height: 400 }}>
+                  <ResponsiveContainer width='100%' height='100%'>
+                    <BarChart
+                      data={prefectureChartData}
+                      margin={{ bottom: 0, left: 10, right: 10, top: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray='3 3'
+                        stroke={alpha('#000', 0.1)}
+                      />
+                      <XAxis
+                        dataKey='name'
+                        angle={-45}
+                        textAnchor='end'
+                        height={80}
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: theme.palette.background.paper,
+                          border: `1px solid ${theme.palette.divider}`,
+                          borderRadius: theme.shape.borderRadius,
+                        }}
+                      />
+                      <Bar
+                        dataKey='count'
+                        fill={theme.palette.primary.main}
+                        radius={[4, 4, 0, 0]}
+                        barSize={24}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Box>
+              </Box>
+            </ChartCard>
+          </Box>
+          <Box sx={{ flex: '1 1 500px' }}>
+            <ChartCard icon={<MapIcon />} title='全国ステーションヒートマップ'>
+              <Box sx={{ height: 400, borderRadius: 2, overflow: 'hidden' }}>
+                <ClientMapWithHeatmap heatmapData={heatmapData} />
+              </Box>
+            </ChartCard>
+          </Box>
         </Box>
 
-        <Box sx={{ flex: 1 }}>
-          <Card>
-            <CardContent>
-              <Typography variant='h5' component='h2' gutterBottom>
-                車両クラス別比率
-              </Typography>
-              <ResponsiveContainer width='100%' height={300}>
-                <PieChart>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', lg: 'row' },
+            gap: 3,
+          }}
+        >
+          <Box sx={{ flex: '1 1 500px', minWidth: 0 }}>
+            <ChartCard icon={<BarChartIcon />} title='車両台数分布ヒストグラム'>
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <Box sx={{ width: 600, height: 400 }}>
+                  <ResponsiveContainer width='100%' height='100%'>
+                    <BarChart
+                      data={histogramData}
+                      margin={{ bottom: 0, left: 10, right: 10, top: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray='3 3'
+                        stroke={alpha('#000', 0.1)}
+                      />
+                      <XAxis dataKey='name' tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: theme.palette.background.paper,
+                          border: `1px solid ${theme.palette.divider}`,
+                          borderRadius: theme.shape.borderRadius,
+                        }}
+                      />
+                      <Bar
+                        dataKey='count'
+                        fill={theme.palette.secondary.main}
+                        radius={[4, 4, 0, 0]}
+                        barSize={24}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Box>
+              </Box>
+            </ChartCard>
+          </Box>
+          <Box sx={{ flex: '1 1 500px' }}>
+            <ChartCard icon={<PieChartIcon />} title='車両クラス別比率'>
+              <ResponsiveContainer width='100%' height={400}>
+                <PieChart margin={{ bottom: 0, left: 10, right: 10, top: 0 }}>
                   <Pie
                     data={classPieData}
                     dataKey='value'
                     nameKey='name'
                     cx='50%'
                     cy='50%'
-                    outerRadius={100}
-                    label
+                    outerRadius={120}
+                    innerRadius={40}
+                    label={({ name, percent }) =>
+                      percent && percent * 100 > 3 ? `${name}` : ''
+                    }
+                    labelLine={false}
+                    fontSize={12}
                   >
                     {classPieData.map((entry, index) => (
                       <Cell
@@ -149,39 +366,69 @@ export function DashboardPageClient({
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: theme.shape.borderRadius,
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                    iconSize={12}
+                  />
                 </PieChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            </ChartCard>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            width: '100%',
+          }}
+        >
+          <Box sx={{ flex: '1 1 100%', minWidth: 0 }}>
+            <ChartCard icon={<DirectionsCarIcon />} title='人気車種トップ10'>
+              <ResponsiveContainer width='100%' height={450}>
+                <BarChart
+                  layout='vertical'
+                  data={top10CarData}
+                  margin={{ top: 0, right: 10, left: 100, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray='3 3'
+                    stroke={alpha('#000', 0.1)}
+                  />
+                  <XAxis type='number' tick={{ fontSize: 12 }} />
+                  <YAxis
+                    dataKey='name'
+                    type='category'
+                    width={90}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: theme.shape.borderRadius,
+                    }}
+                  />
+                  <Bar
+                    dataKey='count'
+                    fill={theme.palette.primary.main}
+                    radius={[0, 4, 4, 0]}
+                    barSize={24}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          </Box>
         </Box>
       </Box>
-
-      {/* Third Row - Top 10 Car Models (Full Width) */}
-      <Box>
-        <Card>
-          <CardContent>
-            <Typography variant='h5' component='h2' gutterBottom>
-              車種トップ10
-            </Typography>
-            <ResponsiveContainer width='100%' height={400}>
-              <BarChart
-                layout='vertical'
-                data={top10CarData}
-                margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray='3 3' />
-                <XAxis type='number' />
-                <YAxis dataKey='name' type='category' width={120} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey='count' fill='#8884d8' name='台数' />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </Box>
-    </Box>
+    </Container>
   );
 }

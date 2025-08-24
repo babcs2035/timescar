@@ -22,16 +22,18 @@ async function getStations(): Promise<Station[]> {
 export default async function DashboardPage() {
   const allStations = await getStations();
 
-  // 1. Geographical Distribution: Stations by Prefecture
+  // --- Data Processing Logic (all on the server) ---
+
+  // 1. Geographical Distribution: Stations by Prefecture (Sorted)
   const prefectureCounts: { [key: string]: number } = {};
   allStations.forEach(station => {
     const prefecture =
       station.address.match(/^(.{2,3}?[都道府県])/)?.[0] || 'その他';
     prefectureCounts[prefecture] = (prefectureCounts[prefecture] || 0) + 1;
   });
-  const prefectureChartData = Object.entries(prefectureCounts).map(
-    ([name, count]) => ({ name, count }),
-  );
+  const prefectureChartData = Object.entries(prefectureCounts)
+    .sort(([, countA], [, countB]) => countB - countA)
+    .map(([name, count]) => ({ name, count }));
 
   // 2. Scale Distribution: Car Count Histogram & Average
   const carCounts = allStations.map(station => station.car_fleet.length);
@@ -41,11 +43,14 @@ export default async function DashboardPage() {
 
   const histogramData: { name: string; count: number }[] = [];
   for (let i = 0; i <= 10; i++) {
-    const min = i * 2;
-    const max = min + 1;
+    const min = i * 5;
+    const max = min + 4;
     const name = `${min}-${max}`;
     const count = carCounts.filter(c => c >= min && c <= max).length;
-    histogramData.push({ name, count });
+    if (count > 0) {
+      // Only add bins that have data
+      histogramData.push({ name, count });
+    }
   }
 
   // 3. Vehicle Composition: Class Ratio & Top 10 Cars
@@ -61,17 +66,17 @@ export default async function DashboardPage() {
     name,
     value,
   }));
+
   const top10CarData = Object.entries(carNameCounts)
     .sort(([, countA], [, countB]) => countB - countA)
     .slice(0, 10)
     .map(([name, count]) => ({ name, count }));
 
-  // 4. Heatmap Data
-  const heatmapData: [number, number, number][] = allStations.map(s => [
-    s.latitude,
-    s.longitude,
-    s.car_fleet.length,
-  ]);
+  const totalCarModels = Object.keys(carNameCounts).length;
+  const heatmapData = allStations.map(
+    s =>
+      [s.latitude, s.longitude, s.car_fleet.length] as [number, number, number],
+  );
 
   return (
     <DashboardPageClient
@@ -81,6 +86,7 @@ export default async function DashboardPage() {
       classPieData={classPieData}
       top10CarData={top10CarData}
       heatmapData={heatmapData}
+      totalCarModels={totalCarModels}
     />
   );
 }

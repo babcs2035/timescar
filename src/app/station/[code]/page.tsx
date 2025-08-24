@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation';
 import { Container } from '@mui/material';
-import type { Station } from '@/types';
+import { notFound } from 'next/navigation';
 import { StationDetailPage } from '@/components/StationDetailPage';
+import type { Station } from '@/types';
 
 /**
  * Fetches single station data from the API route.
@@ -35,7 +35,6 @@ export default async function StationPage({
   const station = await getStation(params.code);
 
   if (!station) {
-    // Return a 404 page if the station is not found
     notFound();
   }
 
