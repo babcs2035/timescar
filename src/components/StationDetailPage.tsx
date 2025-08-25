@@ -176,7 +176,7 @@ export function StationDetailPage({ station }: { station: Station }) {
                     infiniteLoop: true,
                     useKeyboardArrows: true,
                     autoPlay: true,
-                    interval: 5000,
+                    interval: 4000,
                     showStatus: false,
                     emulateTouch: true,
                   } as CarouselProps)}
@@ -192,6 +192,7 @@ export function StationDetailPage({ station }: { station: Station }) {
                           borderRadius: '8px',
                         }}
                         sizes='(max-width: 768px) 100vw, 50vw'
+                        {...(index === 0 ? { priority: true } : {})}
                       />
                     </Box>
                   ))}

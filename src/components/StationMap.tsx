@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  alpha,
-  Box,
-  Button,
-  Chip,
-  Stack,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { alpha, Box, Button, Stack, Typography, useTheme } from '@mui/material';
 import {
   MapContainer,
   Marker,
@@ -66,12 +58,12 @@ export function StationMap({ stations }: StationMapProps) {
     return (cluster: ClusterIcon): L.DivIcon => {
       const count: number = cluster.getChildCount();
       let size: keyof ClusterSize = 'small';
-      if (count >= 10 && count < 100) size = 'medium';
-      if (count >= 100) size = 'large';
+      if (count >= 16 && count < 128) size = 'medium';
+      if (count >= 128) size = 'large';
 
       let color: string = theme.palette.primary.main;
-      if (count >= 50 && count < 200) color = theme.palette.secondary.main;
-      if (count >= 200) color = theme.palette.error.main;
+      if (count >= 16 && count < 128) color = theme.palette.success.main;
+      if (count >= 128) color = theme.palette.secondary.main;
 
       const html: string = `<div style="
         background-color: ${color};
@@ -130,18 +122,6 @@ export function StationMap({ stations }: StationMapProps) {
                       {station.address}
                     </Typography>
                   </Box>
-                  <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
-                    <Chip
-                      label={`1ヶ月先: ${station.disp1MonthReserveLabel || 'N/A'}`}
-                      size='small'
-                      variant='outlined'
-                    />
-                    <Chip
-                      label={`3ヶ月先: ${station.disp3MonthReserveLabel || 'N/A'}`}
-                      size='small'
-                      variant='outlined'
-                    />
-                  </Stack>
                   <Box>
                     <Link
                       href={`/station/${station.station_code}`}

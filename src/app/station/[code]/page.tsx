@@ -30,9 +30,10 @@ async function getStation(code: string): Promise<Station | null> {
 export default async function StationPage({
   params,
 }: {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }) {
-  const station = await getStation(params.code);
+  const { code } = await params;
+  const station = await getStation(code);
 
   if (!station) {
     notFound();
