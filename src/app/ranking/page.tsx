@@ -25,7 +25,7 @@ async function getStations(): Promise<Station[]> {
 export default async function RankingPage() {
   const allStations = await getStations();
 
-  // 1. Calculate Top 10 by number of cars
+  // 1. Calculate Top 16 by number of cars
   const topByCarCount: RankedStation[] = [...allStations]
     .map(station => ({
       code: station.station_code,
@@ -34,9 +34,9 @@ export default async function RankingPage() {
       unit: '台',
     }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
+    .slice(0, 16);
 
-  // 2. Calculate Top 10 by variety of car models
+  // 2. Calculate Top 16 by variety of car models
   const topByVariety: RankedStation[] = [...allStations]
     .map(station => ({
       code: station.station_code,
@@ -45,7 +45,7 @@ export default async function RankingPage() {
       unit: '車種',
     }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
+    .slice(0, 16);
 
   return (
     <RankingPageClient

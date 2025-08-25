@@ -199,7 +199,7 @@ export function RankingPageClient({
           Ranking
         </Typography>
         <Typography variant='body1' color='text.secondary'>
-          全国のタイムズカーステーション ランキング TOP10
+          全国のタイムズカーステーション ランキング TOP16
         </Typography>
       </Box>
 
@@ -212,7 +212,7 @@ export function RankingPageClient({
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <RankingList
-            title='🚗 車両台数ランキング TOP10'
+            title='🚗 車両台数ランキング TOP16'
             stations={topByCarCount}
             icon={<DirectionsCarIcon />}
             color='primary'
@@ -220,7 +220,7 @@ export function RankingPageClient({
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <RankingList
-            title='🎯 車種バリエーションランキング TOP10'
+            title='🎯 車種バリエーションランキング TOP16'
             stations={topByVariety}
             icon={<CategoryIcon />}
             color='secondary'

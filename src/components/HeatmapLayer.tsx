@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import 'leaflet.heat';
 import L from 'leaflet';
+import '@/styles/leaflet-custom.css';
 
 // Define the type for the points prop
 type HeatmapLayerProps = {

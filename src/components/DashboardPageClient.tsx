@@ -55,20 +55,20 @@ const ClientMapWithHeatmap = dynamic(
 );
 
 interface DashboardPageClientProps {
-  averageCars: number;
-  prefectureChartData: { name: string; count: number }[];
-  histogramData: { name: string; count: number }[];
-  classPieData: { name: string; value: number }[];
-  top10CarData: { name: string; count: number }[];
-  heatmapData: [number, number, number][];
+  totalStations: number;
+  totalCars: number;
   totalCarModels: number;
+  prefectureStationChartData: { name: string; count: number }[];
+  prefectureCarCountChartData: { name: string; count: number }[];
+  classPieData: { name: string; value: number }[];
+  top16CarData: { name: string; count: number }[];
+  heatmapData: [number, number, number][];
 }
 
 const StatCard = ({
   icon,
   title,
   value,
-  subtitle,
   color = 'primary' as 'primary' | 'secondary' | 'success' | 'warning',
 }: {
   icon: React.ReactNode;
@@ -114,11 +114,6 @@ const StatCard = ({
         >
           {value}
         </Typography>
-        {subtitle && (
-          <Typography variant='body2' color='text.secondary'>
-            {subtitle}
-          </Typography>
-        )}
       </CardContent>
     </Card>
   );
@@ -157,13 +152,14 @@ const ChartCard = ({
 );
 
 export function DashboardPageClient({
-  averageCars,
-  prefectureChartData,
-  histogramData,
-  classPieData,
-  top10CarData,
-  heatmapData,
+  totalStations,
+  totalCars,
   totalCarModels,
+  prefectureStationChartData,
+  prefectureCarCountChartData,
+  classPieData,
+  top16CarData,
+  heatmapData,
 }: DashboardPageClientProps) {
   const theme = useTheme();
   const COLORS = [
@@ -216,9 +212,8 @@ export function DashboardPageClient({
         <Box sx={{ flex: '1 1 300px' }}>
           <StatCard
             icon={<DirectionsCarIcon />}
-            title='平均車両台数'
-            value={`${averageCars.toFixed(1)}台`}
-            subtitle='1ステーションあたり'
+            title='総車両台数'
+            value={`${totalCars.toLocaleString()}台`}
             color='primary'
           />
         </Box>
@@ -226,8 +221,7 @@ export function DashboardPageClient({
           <StatCard
             icon={<MapIcon />}
             title='総ステーション数'
-            value={`${heatmapData.length.toLocaleString()}カ所`}
-            subtitle='全国展開中'
+            value={`${totalStations.toLocaleString()}カ所`}
             color='secondary'
           />
         </Box>
@@ -236,7 +230,6 @@ export function DashboardPageClient({
             icon={<PieChartIcon />}
             title='車種数'
             value={`${totalCarModels}種類`}
-            subtitle='多様なニーズに対応'
             color='success'
           />
         </Box>
@@ -256,7 +249,7 @@ export function DashboardPageClient({
                 <Box sx={{ width: 1200, height: 400 }}>
                   <ResponsiveContainer width='100%' height='100%'>
                     <BarChart
-                      data={prefectureChartData}
+                      data={prefectureStationChartData}
                       margin={{ bottom: 0, left: 10, right: 10, top: 0 }}
                     >
                       <CartesianGrid
@@ -284,6 +277,7 @@ export function DashboardPageClient({
                         fill={theme.palette.primary.main}
                         radius={[4, 4, 0, 0]}
                         barSize={16}
+                        name='ステーション数'
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -308,41 +302,51 @@ export function DashboardPageClient({
           }}
         >
           <Box sx={{ flex: '1 1 500px', minWidth: 0 }}>
-            <ChartCard icon={<BarChartIcon />} title='車両台数分布ヒストグラム'>
-              <Box sx={{ width: '100%', height: 400, overflow: 'hidden' }}>
-                <ResponsiveContainer width='100%' height='100%'>
-                  <BarChart
-                    data={histogramData}
-                    margin={{ bottom: 0, left: 10, right: 10, top: 0 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray='3 3'
-                      stroke={alpha('#000', 0.1)}
-                    />
-                    <XAxis dataKey='name' tick={{ fontSize: 12 }} unit='台' />
-                    <YAxis tick={{ fontSize: 12 }} unit='カ所' />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: theme.palette.background.paper,
-                        border: `1px solid ${theme.palette.divider}`,
-                        borderRadius: theme.shape.borderRadius,
-                      }}
-                    />
-                    <Bar
-                      dataKey='count'
-                      fill={theme.palette.secondary.main}
-                      radius={[4, 4, 0, 0]}
-                      barSize={16}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+            <ChartCard icon={<BarChartIcon />} title='都道府県別車両数'>
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <Box sx={{ width: 1200, height: 400 }}>
+                  <ResponsiveContainer width='100%' height='100%'>
+                    <BarChart
+                      data={prefectureCarCountChartData}
+                      margin={{ bottom: 0, left: 10, right: 10, top: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray='3 3'
+                        stroke={alpha('#000', 0.1)}
+                      />
+                      <XAxis
+                        dataKey='name'
+                        angle={-45}
+                        textAnchor='end'
+                        height={80}
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis tick={{ fontSize: 12 }} unit='台' />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: theme.palette.background.paper,
+                          border: `1px solid ${theme.palette.divider}`,
+                          borderRadius: theme.shape.borderRadius,
+                        }}
+                      />
+                      <Bar
+                        dataKey='count'
+                        fill={theme.palette.secondary.main}
+                        radius={[4, 4, 0, 0]}
+                        barSize={16}
+                        name='車両数'
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </Box>
               </Box>
             </ChartCard>
           </Box>
           <Box sx={{ flex: '1 1 500px' }}>
             <ChartCard icon={<PieChartIcon />} title='車両クラス別比率'>
               <ResponsiveContainer width='100%' height={400}>
-                <PieChart margin={{ bottom: 0, left: 10, right: 10, top: 0 }}>
+                <PieChart margin={{ top: 0, right: 10, bottom: 10, left: 10 }}>
                   <Pie
                     data={classPieData}
                     dataKey='value'
@@ -390,43 +394,40 @@ export function DashboardPageClient({
           }}
         >
           <Box sx={{ flex: '1 1 100%', minWidth: 0 }}>
-            <ChartCard icon={<DirectionsCarIcon />} title='配備車種トップ10'>
-              <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                <Box sx={{ width: '99%', minWidth: 600, height: 450 }}>
-                  <ResponsiveContainer width='100%' height='100%'>
-                    <BarChart
-                      layout='vertical'
-                      data={top10CarData}
-                      margin={{ top: 0, right: 10, left: 100, bottom: 0 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray='3 3'
-                        stroke={alpha('#000', 0.1)}
-                      />
-                      <XAxis type='number' tick={{ fontSize: 12 }} unit='台' />
-                      <YAxis
-                        dataKey='name'
-                        type='category'
-                        width={90}
-                        tick={{ fontSize: 12 }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: theme.palette.background.paper,
-                          border: `1px solid ${theme.palette.divider}`,
-                          borderRadius: theme.shape.borderRadius,
-                        }}
-                      />
-                      <Bar
-                        dataKey='count'
-                        fill={theme.palette.primary.main}
-                        radius={[0, 4, 4, 0]}
-                        barSize={16}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
-              </Box>
+            <ChartCard icon={<DirectionsCarIcon />} title='配備車種 TOP16'>
+              <ResponsiveContainer width='100%' height={600}>
+                <BarChart
+                  layout='vertical'
+                  data={top16CarData}
+                  margin={{ top: 0, right: 10, left: 100, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray='3 3'
+                    stroke={alpha('#000', 0.1)}
+                  />
+                  <XAxis type='number' tick={{ fontSize: 12 }} unit='台' />
+                  <YAxis
+                    dataKey='name'
+                    type='category'
+                    width={90}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: theme.shape.borderRadius,
+                    }}
+                  />
+                  <Bar
+                    dataKey='count'
+                    fill={theme.palette.primary.main}
+                    radius={[0, 4, 4, 0]}
+                    barSize={16}
+                    name='台数'
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartCard>
           </Box>
         </Box>
