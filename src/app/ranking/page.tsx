@@ -51,6 +51,7 @@ export default async function RankingPage() {
     <RankingPageClient
       topByCarCount={topByCarCount}
       topByVariety={topByVariety}
+      allStations={allStations}
     />
   );
 }

@@ -11,16 +11,21 @@ import {
   CardContent,
   Chip,
   Container,
+  Dialog,
+  Drawer,
   List,
   ListItem,
   ListItemAvatar,
+  ListItemButton,
   ListItemText,
   Typography,
+  useMediaQuery,
   useTheme,
 } from '@mui/material';
-import Link from 'next/link';
+import { useState } from 'react';
+import type { Station } from '@/types';
+import { StationDetailPage } from './StationDetailPage';
 
-// Type for ranked station data
 export interface RankedStation {
   code: string;
   name: string;
@@ -31,45 +36,39 @@ export interface RankedStation {
 interface RankingPageClientProps {
   topByCarCount: RankedStation[];
   topByVariety: RankedStation[];
+  allStations: Station[];
 }
 
-// A reusable component to render a single ranking list
 const RankingList = ({
   title,
   stations,
   icon,
+  onStationClick,
   color = 'primary' as 'primary' | 'secondary',
 }: {
   title: string;
   stations: RankedStation[];
   icon: React.ReactNode;
+  onStationClick: (stationCode: string) => void;
   color?: 'primary' | 'secondary';
 }) => {
   const theme = useTheme();
 
   const getRankIcon = (index: number) => {
     switch (index) {
-      case 0:
-        return '🥇';
-      case 1:
-        return '🥈';
-      case 2:
-        return '🥉';
-      default:
-        return `${index + 1}`;
+      case 0: return '🥇';
+      case 1: return '🥈';
+      case 2: return '🥉';
+      default: return `${index + 1}`;
     }
   };
 
   const getRankColor = (index: number) => {
     switch (index) {
-      case 0:
-        return '#FFD700'; // Gold
-      case 1:
-        return '#C0C0C0'; // Silver
-      case 2:
-        return '#CD7F32'; // Bronze
-      default:
-        return '#757575'; // Grey
+      case 0: return '#FFD700';
+      case 1: return '#C0C0C0';
+      case 2: return '#CD7F32';
+      default: return '#757575';
     }
   };
 
@@ -108,63 +107,65 @@ const RankingList = ({
             {title}
           </Typography>
         </Box>
-
         <List sx={{ p: 0 }}>
           {stations.map((station, index) => (
             <ListItem
               key={station.code}
-              component={Link}
-              href={`/station/${station.code}`}
               sx={{
-                py: 2,
-                px: 3,
+                p: 0,
                 borderBottom:
                   index < stations.length - 1
                     ? `1px solid ${theme.palette.divider}`
                     : 'none',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette[color].main, 0.1),
-                },
-                textDecoration: 'none',
-                color: 'inherit',
               }}
             >
-              <ListItemAvatar>
-                <Avatar
-                  sx={{
-                    bgcolor: getRankColor(index),
-                    color: index < 3 ? '#000' : '#fff',
-                    fontWeight: 700,
-                    fontSize: index < 3 ? '1.2rem' : '1rem',
-                  }}
-                >
-                  {getRankIcon(index)}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <Box
+              <ListItemButton
+                onClick={() => onStationClick(station.code)}
+                sx={{
+                  py: 2,
+                  px: 3,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette[color].main, 0.1),
+                  },
+                }}
+              >
+                <ListItemAvatar>
+                  <Avatar
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
+                      bgcolor: getRankColor(index),
+                      color: index < 3 ? '#000' : '#fff',
+                      fontWeight: 700,
+                      fontSize: index < 3 ? '1.2rem' : '1rem',
                     }}
                   >
-                    <Typography variant='subtitle1' sx={{ fontWeight: 500 }}>
-                      {station.name}
-                    </Typography>
-                    <Chip
-                      label={`${station.value} ${station.unit}`}
-                      color={color}
-                      size='small'
-                      variant='outlined'
-                      sx={{ fontWeight: 600 }}
-                    />
-                  </Box>
-                }
-                secondary={`ステーションコード: ${station.code}`}
-              />
+                    {getRankIcon(index)}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Typography variant='subtitle1' sx={{ fontWeight: 500, pr: 1 }}>
+                        {station.name}
+                      </Typography>
+                      <Chip
+                        label={`${station.value} ${station.unit}`}
+                        color={color}
+                        size='small'
+                        variant='outlined'
+                        sx={{ fontWeight: 600 }}
+                      />
+                    </Box>
+                  }
+                  secondary={`ステーションコード: ${station.code}`}
+                />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>
@@ -176,7 +177,23 @@ const RankingList = ({
 export function RankingPageClient({
   topByCarCount,
   topByVariety,
+  allStations
 }: RankingPageClientProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+
+  const handleOpenDetails = (stationCode: string) => {
+    const stationData = allStations.find(s => s.station_code === stationCode);
+    if (stationData) {
+      setSelectedStation(stationData);
+    }
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedStation(null);
+  };
+
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 2, sm: 4 } }}>
       <Box sx={{ mb: 4 }}>
@@ -199,7 +216,7 @@ export function RankingPageClient({
           Ranking
         </Typography>
         <Typography variant='body1' color='text.secondary'>
-          全国のタイムズカーステーション ランキング TOP16
+          全国のタイムズカーステーション ランキング TOP10
         </Typography>
       </Box>
 
@@ -212,21 +229,43 @@ export function RankingPageClient({
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <RankingList
-            title='🚗 車両台数ランキング TOP16'
+            title='🚗 車両台数ランキング TOP10'
             stations={topByCarCount}
             icon={<DirectionsCarIcon />}
+            onStationClick={handleOpenDetails}
             color='primary'
           />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <RankingList
-            title='🎯 車種バリエーションランキング TOP16'
+            title='🎯 車種バリエーションランキング TOP10'
             stations={topByVariety}
             icon={<CategoryIcon />}
+            onStationClick={handleOpenDetails}
             color='secondary'
           />
         </Box>
       </Box>
+
+      {isMobile ? (
+        <Drawer
+          anchor="bottom"
+          open={!!selectedStation}
+          onClose={handleCloseDetails}
+          sx={{ '& .MuiDrawer-paper': { maxHeight: '80vh', borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}
+        >
+          {selectedStation && <StationDetailPage station={selectedStation} onClose={handleCloseDetails} />}
+        </Drawer>
+      ) : (
+        <Dialog
+          open={!!selectedStation}
+          onClose={handleCloseDetails}
+          maxWidth="md"
+          fullWidth
+        >
+          {selectedStation && <StationDetailPage station={selectedStation} onClose={handleCloseDetails} />}
+        </Dialog>
+      )}
     </Container>
   );
 }
