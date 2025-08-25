@@ -1,10 +1,19 @@
 'use client';
 
-import { Box, CircularProgress, Container } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  Container,
+  Dialog,
+  Drawer,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { FilterPanel } from '@/components/FilterPanel';
 import type { Station } from '@/types';
+import { StationDetailPage } from './StationDetailPage';
 
 const StationMap = dynamic(
   () => import('@/components/StationMap').then(mod => mod.StationMap),
@@ -32,12 +41,15 @@ interface ClientPageProps {
 
 export function ClientPage({ allStations }: ClientPageProps) {
   const [isClient, setIsClient] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   // Filter states are managed on the client
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [selectedPrefecture, setSelectedPrefecture] = useState<string>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [selectedCarNames, setSelectedCarNames] = useState<string[]>([]);
@@ -58,6 +70,14 @@ export function ClientPage({ allStations }: ClientPageProps) {
       return prefectureMatch && cityMatch && nameMatch;
     });
   }, [allStations, selectedPrefecture, selectedCity, selectedCarNames]);
+
+  const handleOpenDetails = (station: Station) => {
+    setSelectedStation(station);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedStation(null);
+  };
 
   return (
     <Container
@@ -81,7 +101,47 @@ export function ClientPage({ allStations }: ClientPageProps) {
         filteredCount={filteredStations.length}
       />
       {isClient ? (
-        <StationMap stations={filteredStations} />
+        <>
+          <StationMap
+            stations={filteredStations}
+            onOpenDetails={handleOpenDetails}
+          />
+          {isMobile ? (
+            <Drawer
+              anchor='bottom'
+              open={!!selectedStation}
+              onClose={handleCloseDetails}
+              sx={{
+                '& .MuiDrawer-paper': {
+                  maxHeight: '80vh',
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                },
+              }}
+            >
+              {selectedStation && (
+                <StationDetailPage
+                  station={selectedStation}
+                  onClose={handleCloseDetails}
+                />
+              )}
+            </Drawer>
+          ) : (
+            <Dialog
+              open={!!selectedStation}
+              onClose={handleCloseDetails}
+              maxWidth='md'
+              fullWidth
+            >
+              {selectedStation && (
+                <StationDetailPage
+                  station={selectedStation}
+                  onClose={handleCloseDetails}
+                />
+              )}
+            </Dialog>
+          )}
+        </>
       ) : (
         <Box
           sx={{

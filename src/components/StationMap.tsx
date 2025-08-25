@@ -14,7 +14,6 @@ import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import Link from 'next/link';
 import { useMemo } from 'react';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import type { Station } from '@/types';
@@ -27,9 +26,10 @@ L.Icon.Default.mergeOptions({
 
 interface StationMapProps {
   stations: Station[];
+  onOpenDetails: (station: Station) => void;
 }
 
-export function StationMap({ stations }: StationMapProps) {
+export function StationMap({ stations, onOpenDetails }: StationMapProps) {
   const theme = useTheme();
 
   const iconCreateFunction = useMemo(() => {
@@ -123,14 +123,14 @@ export function StationMap({ stations }: StationMapProps) {
                     </Typography>
                   </Box>
                   <Box>
-                    <Link
-                      href={`/station/${station.station_code}`}
-                      style={{ textDecoration: 'none' }}
+                    <Button
+                      variant='contained'
+                      size='small'
+                      fullWidth
+                      onClick={() => onOpenDetails(station)}
                     >
-                      <Button variant='contained' size='small' fullWidth>
-                        詳細を見る
-                      </Button>
-                    </Link>
+                      詳細を見る
+                    </Button>
                   </Box>
                 </Stack>
               </Popup>

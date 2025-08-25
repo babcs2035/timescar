@@ -1,5 +1,6 @@
 'use client';
 
+import CloseIcon from '@mui/icons-material/Close';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import InfoIcon from '@mui/icons-material/Info';
@@ -15,6 +16,7 @@ import {
   Chip,
   Container,
   Divider,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -84,14 +86,29 @@ const getClassColor = (className: string) => {
   }
 };
 
-export function StationDetailPage({ station }: { station: Station }) {
+interface StationDetailPageProps {
+  station: Station;
+  onClose: () => void;
+}
+
+export function StationDetailPage({
+  station,
+  onClose,
+}: StationDetailPageProps) {
   const theme = useTheme();
 
   return (
     <Container maxWidth='lg' sx={{ py: { xs: 2, sm: 4 } }}>
+      <IconButton
+        onClick={onClose}
+        sx={{ position: 'absolute', top: 2, right: 2 }}
+      >
+        <CloseIcon />
+      </IconButton>
       <Paper
         sx={{
           p: { xs: 3, sm: 4 },
+          mt: { xs: 4, sm: 1 },
           mb: 4,
           background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
           border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
