@@ -56,19 +56,27 @@ const RankingList = ({
 
   const getRankIcon = (index: number) => {
     switch (index) {
-      case 0: return '🥇';
-      case 1: return '🥈';
-      case 2: return '🥉';
-      default: return `${index + 1}`;
+      case 0:
+        return '🥇';
+      case 1:
+        return '🥈';
+      case 2:
+        return '🥉';
+      default:
+        return `${index + 1}`;
     }
   };
 
   const getRankColor = (index: number) => {
     switch (index) {
-      case 0: return '#FFD700';
-      case 1: return '#C0C0C0';
-      case 2: return '#CD7F32';
-      default: return '#757575';
+      case 0:
+        return '#FFD700';
+      case 1:
+        return '#C0C0C0';
+      case 2:
+        return '#CD7F32';
+      default:
+        return '#757575';
     }
   };
 
@@ -151,7 +159,10 @@ const RankingList = ({
                         justifyContent: 'space-between',
                       }}
                     >
-                      <Typography variant='subtitle1' sx={{ fontWeight: 500, pr: 1 }}>
+                      <Typography
+                        variant='subtitle1'
+                        sx={{ fontWeight: 500, pr: 1 }}
+                      >
                         {station.name}
                       </Typography>
                       <Chip
@@ -177,7 +188,7 @@ const RankingList = ({
 export function RankingPageClient({
   topByCarCount,
   topByVariety,
-  allStations
+  allStations,
 }: RankingPageClientProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -249,21 +260,37 @@ export function RankingPageClient({
 
       {isMobile ? (
         <Drawer
-          anchor="bottom"
+          anchor='bottom'
           open={!!selectedStation}
           onClose={handleCloseDetails}
-          sx={{ '& .MuiDrawer-paper': { maxHeight: '80vh', borderTopLeftRadius: 16, borderTopRightRadius: 16 } }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              maxHeight: '80vh',
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+            },
+          }}
         >
-          {selectedStation && <StationDetailPage station={selectedStation} onClose={handleCloseDetails} />}
+          {selectedStation && (
+            <StationDetailPage
+              station={selectedStation}
+              onClose={handleCloseDetails}
+            />
+          )}
         </Drawer>
       ) : (
         <Dialog
           open={!!selectedStation}
           onClose={handleCloseDetails}
-          maxWidth="md"
+          maxWidth='md'
           fullWidth
         >
-          {selectedStation && <StationDetailPage station={selectedStation} onClose={handleCloseDetails} />}
+          {selectedStation && (
+            <StationDetailPage
+              station={selectedStation}
+              onClose={handleCloseDetails}
+            />
+          )}
         </Dialog>
       )}
     </Container>

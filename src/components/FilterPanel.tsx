@@ -80,7 +80,7 @@ export function FilterPanel({
       }
 
       if (s.address.startsWith(tempSelectedPrefecture)) {
-        const cityMatch = s.address.match(/市|区|郡|町|村/);
+        const cityMatch = s.address.match(/(市|区|郡|町|村)/);
         if (cityMatch && cityMatch.index !== undefined) {
           const cityIndex = cityMatch.index + cityMatch[0].length;
           const city = s.address.substring(
