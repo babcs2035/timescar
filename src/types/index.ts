@@ -10,6 +10,7 @@ export interface Station {
   _id: string;
   station_code: string;
   station_name: string;
+  station_comment: string;
   latitude: number;
   longitude: number;
   address: string;

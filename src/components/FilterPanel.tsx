@@ -266,7 +266,7 @@ export function FilterPanel({
           alignItems: 'center',
           justifyContent: 'space-between',
           cursor: 'pointer',
-          p: 2,
+          p: 1.4,
         }}
         onClick={() => setIsExpanded(!isExpanded)}
       >

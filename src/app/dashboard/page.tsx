@@ -58,9 +58,8 @@ export default async function DashboardPage() {
     value,
   }));
 
-  const top16CarData = Object.entries(carNameCounts)
+  const topCarData = Object.entries(carNameCounts)
     .sort(([, countA], [, countB]) => countB - countA)
-    .slice(0, 16)
     .map(([name, count]) => ({ name, count }));
 
   const totalCarModels = Object.keys(carNameCounts).length;
@@ -76,7 +75,7 @@ export default async function DashboardPage() {
       prefectureStationChartData={prefectureStationChartData}
       prefectureCarCountChartData={prefectureCarCountChartData}
       classPieData={classPieData}
-      top16CarData={top16CarData}
+      topCarData={topCarData}
       heatmapData={heatmapData}
       totalCarModels={totalCarModels}
     />

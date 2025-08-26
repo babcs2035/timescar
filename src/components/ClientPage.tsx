@@ -120,10 +120,7 @@ export function ClientPage({ allStations }: ClientPageProps) {
               }}
             >
               {selectedStation && (
-                <StationDetailPage
-                  station={selectedStation}
-                  onClose={handleCloseDetails}
-                />
+                <StationDetailPage station={selectedStation} />
               )}
             </Drawer>
           ) : (
@@ -134,10 +131,7 @@ export function ClientPage({ allStations }: ClientPageProps) {
               fullWidth
             >
               {selectedStation && (
-                <StationDetailPage
-                  station={selectedStation}
-                  onClose={handleCloseDetails}
-                />
+                <StationDetailPage station={selectedStation} />
               )}
             </Dialog>
           )}

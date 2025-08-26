@@ -174,7 +174,6 @@ const RankingList = ({
                       />
                     </Box>
                   }
-                  secondary={`ステーションコード: ${station.code}`}
                 />
               </ListItemButton>
             </ListItem>
@@ -227,7 +226,7 @@ export function RankingPageClient({
           Ranking
         </Typography>
         <Typography variant='body1' color='text.secondary'>
-          全国のタイムズカーステーション ランキング TOP10
+          全国のタイムズカーステーション ランキング TOP16
         </Typography>
       </Box>
 
@@ -240,7 +239,7 @@ export function RankingPageClient({
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <RankingList
-            title='🚗 車両台数ランキング TOP10'
+            title='🚗 車両台数ランキング TOP16'
             stations={topByCarCount}
             icon={<DirectionsCarIcon />}
             onStationClick={handleOpenDetails}
@@ -249,7 +248,7 @@ export function RankingPageClient({
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <RankingList
-            title='🎯 車種バリエーションランキング TOP10'
+            title='🎯 車種バリエーションランキング TOP16'
             stations={topByVariety}
             icon={<CategoryIcon />}
             onStationClick={handleOpenDetails}
@@ -271,12 +270,7 @@ export function RankingPageClient({
             },
           }}
         >
-          {selectedStation && (
-            <StationDetailPage
-              station={selectedStation}
-              onClose={handleCloseDetails}
-            />
-          )}
+          {selectedStation && <StationDetailPage station={selectedStation} />}
         </Drawer>
       ) : (
         <Dialog
@@ -285,12 +279,7 @@ export function RankingPageClient({
           maxWidth='md'
           fullWidth
         >
-          {selectedStation && (
-            <StationDetailPage
-              station={selectedStation}
-              onClose={handleCloseDetails}
-            />
-          )}
+          {selectedStation && <StationDetailPage station={selectedStation} />}
         </Dialog>
       )}
     </Container>

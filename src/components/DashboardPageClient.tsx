@@ -61,7 +61,7 @@ interface DashboardPageClientProps {
   prefectureStationChartData: { name: string; count: number }[];
   prefectureCarCountChartData: { name: string; count: number }[];
   classPieData: { name: string; value: number }[];
-  top16CarData: { name: string; count: number }[];
+  topCarData: { name: string; count: number }[];
   heatmapData: [number, number, number][];
 }
 
@@ -158,7 +158,7 @@ export function DashboardPageClient({
   prefectureStationChartData,
   prefectureCarCountChartData,
   classPieData,
-  top16CarData,
+  topCarData,
   heatmapData,
 }: DashboardPageClientProps) {
   const theme = useTheme();
@@ -212,7 +212,7 @@ export function DashboardPageClient({
         <Box sx={{ flex: '1 1 300px' }}>
           <StatCard
             icon={<DirectionsCarIcon />}
-            title='総車両台数'
+            title='総車両数'
             value={`${totalCars.toLocaleString()}台`}
             color='primary'
           />
@@ -394,11 +394,11 @@ export function DashboardPageClient({
           }}
         >
           <Box sx={{ flex: '1 1 100%', minWidth: 0 }}>
-            <ChartCard icon={<DirectionsCarIcon />} title='配備車種 TOP16'>
-              <ResponsiveContainer width='100%' height={600}>
+            <ChartCard icon={<DirectionsCarIcon />} title='車種別車両数'>
+              <ResponsiveContainer width='100%' height={1024}>
                 <BarChart
                   layout='vertical'
-                  data={top16CarData}
+                  data={topCarData}
                   margin={{ top: 0, right: 10, left: 100, bottom: 0 }}
                 >
                   <CartesianGrid

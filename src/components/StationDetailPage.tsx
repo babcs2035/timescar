@@ -1,6 +1,5 @@
 'use client';
 
-import CloseIcon from '@mui/icons-material/Close';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import InfoIcon from '@mui/icons-material/Info';
@@ -14,9 +13,7 @@ import {
   Card,
   CardContent,
   Chip,
-  Container,
   Divider,
-  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -88,30 +85,20 @@ const getClassColor = (className: string) => {
 
 interface StationDetailPageProps {
   station: Station;
-  onClose: () => void;
 }
 
-export function StationDetailPage({
-  station,
-  onClose,
-}: StationDetailPageProps) {
+export function StationDetailPage({ station }: StationDetailPageProps) {
   const theme = useTheme();
 
   return (
-    <Container maxWidth='lg' sx={{ py: { xs: 2, sm: 4 } }}>
-      <IconButton
-        onClick={onClose}
-        sx={{ position: 'absolute', top: 2, right: 2 }}
-      >
-        <CloseIcon />
-      </IconButton>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
       <Paper
         sx={{
-          p: { xs: 3, sm: 4 },
-          mt: { xs: 4, sm: 1 },
-          mb: 4,
+          p: { xs: 2, sm: 3 },
+          mb: 3,
           background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
           border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+          position: 'relative',
         }}
       >
         <Stack
@@ -138,28 +125,44 @@ export function StationDetailPage({
                 {station.address}
               </Typography>
             </Box>
-            <Button
-              variant='outlined'
-              startIcon={<LaunchIcon />}
-              href={`https://www.google.com/maps/search/?api=1&query=${station.latitude},${station.longitude}`}
-              target='_blank'
-              rel='noopener'
-              sx={{ borderRadius: 2 }}
-            >
-              Google Maps で開く
-            </Button>
-          </Box>
 
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              sx={{ mt: 2 }}
+            >
+              <Button
+                variant='outlined'
+                startIcon={<LaunchIcon />}
+                href={`https://maps.google.com/?q=${station.latitude},${station.longitude}`}
+                target='_blank'
+                rel='noopener'
+                sx={{ borderRadius: 2 }}
+              >
+                Google Maps で開く
+              </Button>
+              <Button
+                variant='contained'
+                color='warning'
+                href={`https://share.timescar.jp/view/reserve/input.jsp?scd=${station.station_code}`}
+                target='_blank'
+                rel='noopener'
+                sx={{ borderRadius: 2 }}
+              >
+                公式サイトで予約
+              </Button>
+            </Stack>
+          </Box>
           <Stack spacing={1} sx={{ minWidth: 200 }}>
             <Chip
               icon={<EventAvailableIcon />}
-              label={`1ヶ月先: ${station.disp1MonthReserveLabel || 'N/A'}`}
+              label={`1ヶ月前予約: ${station.disp1MonthReserveLabel ? '〇' : '×'}`}
               variant='outlined'
               size='medium'
             />
             <Chip
               icon={<EventAvailableIcon />}
-              label={`3ヶ月先: ${station.disp3MonthReserveLabel || 'N/A'}`}
+              label={`3ヶ月前予約: ${station.disp3MonthReserveLabel ? '〇' : '×'}`}
               variant='outlined'
               size='medium'
             />
@@ -308,6 +311,20 @@ export function StationDetailPage({
             ステーション情報サマリー
           </Typography>
           <Divider sx={{ mb: 2 }} />
+          {station.station_comment && (
+            <Box
+              sx={{
+                mb: 2,
+                p: 2,
+                borderRadius: 2,
+                bgcolor: alpha(theme.palette.grey[500], 0.1),
+              }}
+            >
+              <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap' }}>
+                {station.station_comment}
+              </Typography>
+            </Box>
+          )}
           <Box
             sx={{
               display: 'flex',
@@ -368,6 +385,6 @@ export function StationDetailPage({
           </Box>
         </CardContent>
       </Card>
-    </Container>
+    </Box>
   );
 }
