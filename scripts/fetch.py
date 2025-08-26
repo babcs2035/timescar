@@ -3,6 +3,7 @@ import time
 import json
 import re
 from pymongo import MongoClient
+from pyproj import Transformer, CRS
 
 # --- Settings ---
 MONGO_URI = "mongodb://localhost:27017/"
@@ -13,6 +14,13 @@ MONGO_COLLECTION_NAME = "stations"
 BASE_URL = "https://share.timescar.jp"
 STATIONS_URL = f"{BASE_URL}/view/station/teeda.ajax?component=station_stationMapPage&action=ajaxViewMap&minlat=23.4043&maxlat=47.0306&minlon=123.1350&maxlon=149.1116"
 DETAIL_URL = f"{BASE_URL}/view/station/teeda.ajax?&component=station_detailPage&action=ajaxStation&scd={{}}"
+
+def convert_zdc_to_leaflet(lon, lat):
+    crs_tokyo = CRS("EPSG:4301")
+    crs_wgs84 = CRS("EPSG:4326")
+    transformer = Transformer.from_crs(crs_tokyo, crs_wgs84, always_xy=True)
+    new_lon, new_lat = transformer.transform(lon, lat)
+    return new_lat, new_lon
 
 def fetch_and_process_data():
     """Fetches, processes, and saves each Times Car station data to MongoDB."""
@@ -45,6 +53,9 @@ def fetch_and_process_data():
                 detail_response = requests.get(DETAIL_URL.format(station_code))
                 detail_response.raise_for_status()
                 station_detail = detail_response.json()
+                if station_detail is None:
+                    print(f"  → No detail data found for {station_code}, skipping.")
+                    continue
                 
                 photo_urls = []
                 for item in station_detail.get("photoImage", []):
@@ -62,11 +73,13 @@ def fetch_and_process_data():
                     } for car in station_detail.get("carInfo", [])
                 ]
 
+                zdc_lat, zdc_lon = float(station.get("la", 0)), float(station.get("lo", 0))
+                leaflet_lat, leaflet_lon = convert_zdc_to_leaflet(zdc_lon, zdc_lat)
                 combined_data = {
                     "station_code": station_code,
                     "station_name": station.get("nm"),
-                    "latitude": float(station.get("la", 0)),
-                    "longitude": float(station.get("lo", 0)),
+                    "latitude": leaflet_lat,
+                    "longitude": leaflet_lon,
                     "address": station_detail.get("adr1"),
                     "station_comment": station_comment,
                     "car_fleet": car_fleet,
