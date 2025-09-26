@@ -4,6 +4,8 @@ import json
 import re
 from pymongo import MongoClient
 from pyproj import Transformer, CRS
+from datetime import datetime
+from tqdm import tqdm
 
 # --- Settings ---
 MONGO_URI = "mongodb://localhost:27017/"
@@ -28,6 +30,7 @@ def fetch_and_process_data():
     client = MongoClient(MONGO_URI)
     db = client[MONGO_DB_NAME]
     collection = db[MONGO_COLLECTION_NAME]
+    meta_collection = db["meta"]
     
     try:
         print("Starting to fetch the station list...")
@@ -35,18 +38,12 @@ def fetch_and_process_data():
         response.raise_for_status()
         station_codes = response.json().get("s", [])
         total_stations = len(station_codes)
-        print(f"Found a total of {total_stations} stations.")
         
         upsert_count = 0
-        
-        for i, station in enumerate(station_codes):
+        for i, station in enumerate(tqdm(station_codes, desc="Stations", unit="station")):
             station_code = station.get("cd")
             if not station_code:
                 continue
-
-            print(f"[{i+1}/{total_stations}] Processing data for {station_code}...")
-            
-            # Wait for 1 second to reduce server load
             time.sleep(1) 
             
             try:
@@ -96,15 +93,18 @@ def fetch_and_process_data():
                 
                 if result.upserted_id:
                     upsert_count += 1
-                    print(f"  → New station inserted: {station_code}")
-                else:
-                    print(f"  → Station updated: {station_code}")
                     
             except requests.exceptions.RequestException as e:
                 print(f"  → Error fetching data for {station_code}: {e}")
                 continue
 
         print(f"\nProcessing complete. Total stations processed: {total_stations}, newly inserted: {upsert_count}")
+
+        meta_collection.update_one(
+            {"_id": "last_updated"},
+            {"$set": {"last_updated": datetime.now().isoformat()}},
+            upsert=True
+        )
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred while fetching station list: {e}")
