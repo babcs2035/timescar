@@ -3,8 +3,8 @@
 # ==============================================
 
 # ── ベースイメージ ──
-FROM node:25-alpine AS base
-RUN npm install -g pnpm@10.33.0
+FROM node:26-alpine AS base
+RUN npm install -g pnpm@11.8.0
 
 # ── 依存関係インストール ──
 FROM base AS deps

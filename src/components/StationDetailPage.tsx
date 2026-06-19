@@ -43,6 +43,7 @@ const Carousel = dynamic(
   () => import('react-responsive-carousel').then(mod => mod.Carousel),
   { ssr: false },
 );
+
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import type { CarouselProps } from 'react-responsive-carousel';
 
